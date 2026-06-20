@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aca Space — Pelacak Dokumen & Regulasi Lingkungan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS (PASTEL · PINK) ============ */
+:root{
+  --bg:#FDF3F8;
+  --surface:#FFFFFF;
+  --surface-2:#FBECF3;
+  --surface-3:#FFF8FB;
+  --ink:#46343F;
+  --ink-soft:#90798A;
+  --line:#F2DCE8;
+
+  --pink:#F49CC0;
+  --pink-deep:#E76C9C;
+  --lavender:#BCA7E8;
+  --lavender-deep:#9A7BD6;
+  --mint:#9BD7BB;
+  --mint-deep:#56B485;
+  --peach:#FBC79B;
+  --sky:#A8C9F0;
+  --coral:#F58A8A;
+
+  --shadow-sm:0 1px 2px rgba(150,70,110,.06),0 1px 1px rgba(150,70,110,.04);
+  --shadow-md:0 8px 26px rgba(190,90,140,.14);
+  --shadow-lg:0 20px 54px rgba(190,90,140,.22);
+  --radius:16px;
+
+  --sans:'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+/* ============ RESET ============ */
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans);
+  background:
+    radial-gradient(820px 460px at 86% -8%, rgba(188,167,232,.22), transparent 60%),
+    radial-gradient(760px 520px at -4% 2%, rgba(244,156,192,.28), transparent 58%),
+    var(--bg);
+  background-attachment:fixed;
+  color:var(--ink);line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:1rem;color:inherit}
+a{color:inherit;text-decoration:none}
+.mono{font-family:var(--mono);font-feature-settings:"tnum" 1}
+
+/* ============ TOPBAR ============ */
+.topbar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.8);backdrop-filter:saturate(160%) blur(12px);border-bottom:1px solid var(--line)}
+.topbar-inner{max-width:1180px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px;margin-right:auto}
+.brand-mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--pink),var(--lavender));display:grid;place-items:center;color:#fff;flex:none;box-shadow:0 6px 16px rgba(231,108,156,.35)}
+.brand-mark svg{width:21px;height:21px}
+.brand-name{font-weight:800;font-size:1.22rem;letter-spacing:-.02em;line-height:1}
+.brand-sub{font-size:.72rem;color:var(--ink-soft);font-weight:500;margin-top:2px}
+.nav{display:flex;gap:5px;background:var(--surface-2);padding:5px;border-radius:13px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;font-weight:600;font-size:.88rem;color:var(--ink-soft);transition:background .18s,color .18s,box-shadow .18s;white-space:nowrap;flex:0 0 auto}
+.nav-btn svg{width:17px;height:17px}
+.nav-btn:hover{color:var(--ink)}
+.nav-btn.active{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm)}
+.nav-badge{min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--coral);color:#fff;font-size:.68rem;font-weight:700;display:inline-grid;place-items:center;line-height:1}
+.nav-badge.pink{background:var(--pink-deep)}
+.nav-badge[data-count="0"]{display:none}
+
+/* ============ LAYOUT ============ */
+main{max-width:1180px;margin:0 auto;padding:30px 22px 80px}
+.view[hidden]{display:none}
+.page-head{margin-bottom:22px}
+.page-title{font-size:1.65rem;font-weight:800;letter-spacing:-.025em;line-height:1.1}
+.page-desc{color:var(--ink-soft);font-size:.95rem;margin-top:5px;max-width:64ch}
+
+/* ============ BANNER ============ */
+.banner{display:flex;align-items:flex-start;gap:12px;background:linear-gradient(100deg,rgba(244,156,192,.18),rgba(188,167,232,.14));border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:24px}
+.banner svg{width:20px;height:20px;color:var(--pink-deep);flex:none;margin-top:1px}
+.banner p{font-size:.86rem;color:var(--ink)}
+.banner b{font-weight:700}
+.banner-x{margin-left:auto;color:var(--ink-soft);padding:2px;border-radius:6px;flex:none}
+.banner-x:hover{background:rgba(70,52,63,.07);color:var(--ink)}
+.banner-x svg{width:16px;height:16px}
+
+/* ============ STAT CARDS ============ */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+.stat{background:var(--surface);border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow-sm);border:1px solid var(--line);position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent,var(--pink))}
+.stat-ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;margin-bottom:12px;background:color-mix(in srgb,var(--accent,var(--pink)) 16%,white);color:var(--accent,var(--pink))}
+.stat-ic svg{width:19px;height:19px}
+.stat-num{font-size:2.1rem;font-weight:800;letter-spacing:-.03em;line-height:1}
+.stat-label{font-size:.82rem;color:var(--ink-soft);font-weight:600;margin-top:4px}
+.stat.mint{--accent:var(--mint-deep)} .stat.coral{--accent:#EE7B7B}
+.stat.pink{--accent:var(--pink-deep)} .stat.lavender{--accent:var(--lavender-deep)}
+
+/* ============ PANELS ============ */
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--line);overflow:hidden}
+.panel-head{display:flex;align-items:center;gap:9px;padding:16px 18px 12px}
+.panel-head h2{font-size:1.02rem;font-weight:700;letter-spacing:-.01em}
+.panel-dot{width:9px;height:9px;border-radius:50%;flex:none}
+.panel-head .count{margin-left:auto;font-size:.78rem;color:var(--ink-soft);font-weight:600}
+.panel-list{padding:4px 10px 12px}
+.mini{display:flex;align-items:center;gap:12px;padding:11px 8px;border-radius:11px;transition:background .15s;cursor:pointer;border-left:3px solid var(--spine,transparent)}
+.mini:hover{background:var(--surface-2)}
+.mini-body{min-width:0;flex:1}
+.mini-title{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-meta{font-size:.76rem;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.mini-right{flex:none}
+.panel-empty{padding:26px 18px;text-align:center;color:var(--ink-soft);font-size:.86rem}
+
+/* ============ TOOLBAR ============ */
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.search{position:relative;flex:1;min-width:200px}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--ink-soft)}
+.search input{width:100%;padding:11px 14px 11px 39px;border-radius:11px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow-sm);transition:border-color .15s,box-shadow .15s}
+.search input::placeholder{color:var(--ink-soft)}
+.search input:focus{outline:none;border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(231,108,156,.18)}
+.btn-add{display:inline-flex;align-items:center;gap:7px;padding:11px 17px;border-radius:11px;font-weight:700;font-size:.92rem;background:linear-gradient(135deg,var(--pink-deep),var(--lavender-deep));color:#fff;box-shadow:0 8px 18px rgba(231,108,156,.32);transition:transform .12s,box-shadow .15s;white-space:nowrap}
+.btn-add svg{width:17px;height:17px}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 11px 22px rgba(231,108,156,.4)}
+.btn-add:active{transform:translateY(0)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.chip{padding:7px 13px;border-radius:999px;font-size:.82rem;font-weight:600;background:var(--surface);border:1px solid var(--line);color:var(--ink-soft);transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{border-color:var(--pink-deep);color:var(--ink)}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip .c-num{font-size:.72rem;opacity:.7;font-family:var(--mono)}
+
+/* ============ CARDS ============ */
+.cards{display:grid;gap:13px}
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--line);box-shadow:var(--shadow-sm);display:flex;position:relative;overflow:hidden;transition:transform .14s,box-shadow .14s;cursor:pointer}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.card:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(231,108,156,.3),var(--shadow-md)}
+.doc-card,.reg-card{border-left:5px solid var(--spine,#ccc)}
+.card-main{padding:15px 16px;flex:1;min-width:0}
+.card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.card-title{font-size:1.04rem;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.card-klien{color:var(--ink-soft);font-size:.86rem;margin-top:2px}
+.card-meta{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-top:12px}
+.meta{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;color:var(--ink-soft);font-weight:500}
+.meta svg{width:14px;height:14px;flex:none}
+.meta.link{color:var(--lavender-deep);font-weight:600}
+.meta.link:hover{text-decoration:underline}
+.jenis-tag{font-family:var(--mono);font-size:.72rem;font-weight:500;color:var(--ink-soft);background:var(--surface-2);padding:3px 8px;border-radius:7px}
+.progress-meta{display:flex;justify-content:space-between;align-items:center;margin-top:7px;font-size:.76rem;color:var(--ink-soft);font-weight:600}
+.card-edit{width:34px;flex:none;display:grid;place-items:center;color:var(--ink-soft);border-left:1px solid var(--line);transition:background .15s,color .15s}
+.card-edit:hover{background:var(--surface-2);color:var(--pink-deep)}
+.card-edit svg{width:16px;height:16px}
+.progress{height:7px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.progress-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--mint),var(--pink))}
+.reg-nomor{font-size:.82rem;font-weight:500;color:var(--pink-deep);margin-bottom:3px}
+.reg-note{font-size:.83rem;color:var(--ink-soft);margin-top:10px;line-height:1.45}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.73rem;font-weight:700;line-height:1;white-space:nowrap}
+.pill .pdot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.85}
+.s-sky{background:#E5F0FC;color:#3E6FA3}
+.s-grape{background:#EDE6FA;color:#6B52A8}
+.s-sun{background:#FCF1D6;color:#9A7726}
+.s-coral{background:#FBE2E2;color:#B85656}
+.s-leaf{background:#DFF3E8;color:#3E8C66}
+.s-pink{background:#FCE3EE;color:#C25685}
+.s-grey{background:#F0E8ED;color:#90798A}
+.u-over{--spine:#F47A8F} .u-soon{--spine:#F6C268} .u-ok{--spine:#9BD7BB}
+.u-far{--spine:#C5D8C9} .u-done{--spine:#DCD2D8} .u-none{--spine:#DCD2D8}
+.up{padding:4px 10px;border-radius:999px;font-size:.73rem;font-weight:700;white-space:nowrap}
+.up.u-over{background:#FBE2E2;color:#B85656}
+.up.u-soon{background:#FCF1D6;color:#9A7726}
+.up.u-ok{background:#DFF3E8;color:#3E8C66}
+.up.u-far,.up.u-done,.up.u-none{background:#F0E8ED;color:#90798A}
+@media (prefers-reduced-motion: no-preference){
+  .up.u-over{animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+}
+
+/* empty */
+.empty{text-align:center;padding:54px 24px;background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius);color:var(--ink-soft)}
+.empty-ic{width:52px;height:52px;border-radius:14px;background:var(--surface-2);display:grid;place-items:center;margin:0 auto 14px;color:var(--pink-deep)}
+.empty-ic svg{width:26px;height:26px}
+.empty h3{font-size:1.05rem;font-weight:700;color:var(--ink);margin-bottom:5px}
+.empty p{font-size:.9rem;max-width:44ch;margin:0 auto}
+
+/* ============ CALENDAR ============ */
+.cal-bar{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.cal-nav{display:flex;align-items:center;gap:6px}
+.cal-arrow{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-sm);color:var(--ink);transition:background .15s}
+.cal-arrow:hover{background:var(--surface-2)}
+.cal-arrow svg{width:18px;height:18px}
+.cal-month{font-weight:800;font-size:1.15rem;min-width:150px;text-align:center;letter-spacing:-.01em}
+.cal-legend{display:flex;gap:14px;margin-left:auto;flex-wrap:wrap;font-size:.76rem;color:var(--ink-soft);font-weight:600}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:11px;height:11px;border-radius:50%}
+.cal-grid{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
+.cal-week-head{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface-2)}
+.cal-week-head div{padding:10px 8px;text-align:center;font-size:.74rem;font-weight:700;color:var(--ink-soft)}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-day{min-height:108px;border-right:1px solid var(--line);border-top:1px solid var(--line);padding:6px;display:flex;flex-direction:column;gap:4px}
+.cal-day:nth-child(7n){border-right:none}
+.cal-day.other{background:var(--surface-3)}
+.cal-day.other .cal-daynum{color:var(--ink-soft);opacity:.55}
+.cal-daynum{font-size:.82rem;font-weight:700;width:24px;height:24px;display:grid;place-items:center;border-radius:8px}
+.cal-day.today .cal-daynum{background:var(--pink-deep);color:#fff}
+.cal-event{font-size:.71rem;font-weight:600;padding:3px 6px;border-radius:6px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--ev,#ccc);background:var(--evbg,#f3f3f3);color:var(--evtx,#333)}
+.cal-event:hover{filter:brightness(.97)}
+.cal-more{font-size:.7rem;color:var(--ink-soft);padding:1px 6px;font-weight:600}
+
+/* ============ MODAL ============ */
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(70,52,63,.4);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:auto}
+@media (min-width:640px){.overlay{align-items:center;padding:24px}}
+.modal{background:var(--surface);width:100%;max-width:580px;max-height:92vh;overflow-y:auto;border-radius:22px 22px 0 0;box-shadow:var(--shadow-lg);transform:translateY(18px);transition:transform .22s}
+@media (min-width:640px){.modal{border-radius:22px;transform:scale(.97)}}
+.overlay.open .modal{transform:none}
+.modal-head{position:sticky;top:0;background:var(--surface);z-index:2;display:flex;align-items:center;gap:12px;padding:20px 22px 14px;border-bottom:1px solid var(--line)}
+.modal-head h2{font-size:1.18rem;font-weight:800;letter-spacing:-.02em}
+.modal-x{margin-left:auto;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--ink-soft);transition:background .15s}
+.modal-x:hover{background:var(--surface-2);color:var(--ink)}
+.modal-x svg{width:18px;height:18px}
+.modal-body{padding:18px 22px}
+.field{margin-bottom:15px}
+.field.row2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.field label{display:block;font-size:.8rem;font-weight:700;margin-bottom:6px}
+.req{color:var(--coral)}
+.control{width:100%;padding:10px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface);transition:border-color .15s,box-shadow .15s}
+.control:focus{outline:none;border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(231,108,156,.18)}
+textarea.control{resize:vertical;min-height:64px}
+.form-section{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.section-title{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--pink-deep);margin-bottom:13px;display:flex;align-items:center;gap:8px}
+.section-title svg{width:15px;height:15px}
+.hint{font-size:.78rem;color:var(--ink-soft);margin-top:9px;line-height:1.4}
+
+/* checklist */
+.checklist{display:flex;flex-direction:column;gap:2px}
+.check-item{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:9px;transition:background .12s}
+.check-item:hover{background:var(--surface-2)}
+.check-item input{width:18px;height:18px;accent-color:var(--mint-deep);flex:none;cursor:pointer}
+.check-label{flex:1;font-size:.9rem}
+.check-label.done{text-decoration:line-through;color:var(--ink-soft)}
+.check-del{color:var(--ink-soft);font-size:1.3rem;line-height:1;padding:0 7px;border-radius:6px}
+.check-del:hover{color:var(--coral);background:#FBE2E2}
+.checklist-empty{font-size:.85rem;color:var(--ink-soft);padding:6px 2px 2px}
+.checklist-add{display:flex;gap:8px;margin-top:10px}
+.checklist-add .control{flex:1}
+.btn-soft{padding:9px 14px;border-radius:10px;background:var(--surface-2);color:var(--ink);font-weight:600;font-size:.86rem;transition:background .15s;white-space:nowrap}
+.btn-soft:hover{background:var(--line)}
+.btn-link{margin-top:11px;color:var(--pink-deep);font-weight:700;font-size:.84rem;display:inline-flex;align-items:center;gap:6px}
+.btn-link:hover{text-decoration:underline}
+.btn-link svg{width:14px;height:14px}
+.prog-computed{margin-top:15px}
+.prog-row{display:flex;justify-content:space-between;font-size:.82rem;color:var(--ink-soft);font-weight:600;margin-bottom:6px}
+.range-wrap{display:flex;align-items:center;gap:13px;margin-top:6px}
+.range-wrap input[type=range]{flex:1;accent-color:var(--pink-deep)}
+.range-val{font-family:var(--mono);font-weight:600;font-size:.92rem;min-width:46px;text-align:right}
+
+/* timeline */
+.timeline{position:relative;padding-left:4px}
+.timeline::before{content:"";position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.tl-item{display:flex;gap:13px;padding:7px 0;position:relative}
+.tl-dot{width:14px;height:14px;border-radius:50%;flex:none;margin-top:2px;box-shadow:0 0 0 3px var(--surface);position:relative;z-index:1}
+.tl-main{font-size:.88rem;font-weight:600}
+.tl-date{font-size:.74rem;color:var(--ink-soft);margin-top:1px}
+
+/* footer */
+.modal-foot{position:sticky;bottom:0;background:var(--surface);display:flex;align-items:center;gap:10px;padding:15px 22px 20px;border-top:1px solid var(--line)}
+.btn-del{margin-right:auto;display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:10px;color:var(--coral);font-weight:600;font-size:.88rem;transition:background .15s}
+.btn-del:hover{background:#FBE2E2}
+.btn-del svg{width:15px;height:15px}
+.btn-del[hidden]{display:none}
+.btn-ghost{padding:10px 16px;border-radius:11px;font-weight:600;color:var(--ink-soft);transition:background .15s}
+.btn-ghost:hover{background:var(--surface-2);color:var(--ink)}
+.btn-primary{padding:10px 20px;border-radius:11px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--pink-deep),var(--lavender-deep));box-shadow:0 7px 16px rgba(231,108,156,.3);transition:transform .12s}
+.btn-primary:hover{transform:translateY(-1px)}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:.9rem;box-shadow:var(--shadow-lg);z-index:80;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;display:flex;align-items:center;gap:9px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast svg{width:17px;height:17px;color:var(--mint)}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:860px){.panels{grid-template-columns:1fr}}
+@media (max-width:680px){
+  .stats{grid-template-columns:1fr 1fr}
+  .brand-sub{display:none}
+  main{padding:22px 15px 70px}
+  .topbar-inner{padding:11px 15px}
+  .nav-btn{padding:9px 11px;font-size:.82rem}
+  .page-title{font-size:1.4rem}
+  .cal-day{min-height:84px}
+  .cal-event{font-size:.66rem;padding:2px 4px}
+  .cal-legend{font-size:.7rem;gap:9px}
+}
+@media (max-width:420px){
+  .stats{grid-template-columns:1fr}
+  .field.row2{grid-template-columns:1fr}
+  .cal-week-head div{font-size:.64rem;padding:7px 2px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">Aca Space</div>
+        <div class="brand-sub">Pelacak dokumen &amp; regulasi lingkungan</div>
+      </div>
+    </div>
+    <nav class="nav" role="tablist">
+      <button class="nav-btn active" data-tab="dashboard" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        <span>Beranda</span>
+      </button>
+      <button class="nav-btn" data-tab="docs" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+        <span>Dokumen</span>
+        <span class="nav-badge" id="badgeDocs" data-count="0">0</span>
+      </button>
+      <button class="nav-btn" data-tab="cal" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span>Kalender</span>
+      </button>
+      <button class="nav-btn" data-tab="regs" role="tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6v13a2 2 0 0 0 2 2h14"/><path d="M7 3h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M9 8h6M9 12h6"/></svg>
+        <span>Regulasi</span>
+        <span class="nav-badge pink" id="badgeRegs" data-count="0">0</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- DASHBOARD -->
+  <section class="view" id="view-dashboard">
+    <div class="page-head">
+      <h1 class="page-title">Beranda</h1>
+      <p class="page-desc">Ringkasan dokumen yang sedang berjalan dan regulasi yang perlu diperhatikan hari ini.</p>
+    </div>
+    <div class="banner" id="banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <p><b>Data contoh sudah dimuat.</b> Klik dokumen mana pun untuk mengisi checklist tahapan dan melihat riwayat statusnya. Semua perubahan tersimpan otomatis di perangkat ini.</p>
+      <button class="banner-x" id="bannerX" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="panels">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-dot" style="background:#F47A8F"></span><h2>Deadline terdekat</h2><span class="count" id="cntDeadline"></span></div>
+        <div class="panel-list" id="panelDeadline"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-dot" style="background:var(--pink-deep)"></span><h2>Perlu diperhatikan</h2><span class="count" id="cntRegs"></span></div>
+        <div class="panel-list" id="panelRegs"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOCS -->
+  <section class="view" id="view-docs" hidden>
+    <div class="page-head">
+      <h1 class="page-title">Dokumen lingkungan</h1>
+      <p class="page-desc">Garis warna di tepi kiri menandai kedekatan deadline — merah berarti mendesak atau lewat, kuning sudah dekat, hijau masih aman.</p>
+    </div>
+    <div class="toolbar">
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="text" id="searchDocs" placeholder="Cari proyek, klien, atau jenis dokumen…"></div>
+      <button class="btn-add" id="addDoc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tambah dokumen</button>
+    </div>
+    <div class="chips" id="chipsDocs"></div>
+    <div class="cards" id="listDocs"></div>
+  </section>
+
+  <!-- CALENDAR -->
+  <section class="view" id="view-cal" hidden>
+    <div class="page-head">
+      <h1 class="page-title">Kalender deadline</h1>
+      <p class="page-desc">Lihat sebaran tenggat dokumen sepanjang bulan agar mudah mengenali minggu yang padat. Klik sebuah agenda untuk membuka dokumennya.</p>
+    </div>
+    <div class="cal-bar">
+      <div class="cal-nav">
+        <button id="calPrev" class="cal-arrow" aria-label="Bulan sebelumnya"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+        <div class="cal-month" id="calMonth">—</div>
+        <button id="calNext" class="cal-arrow" aria-label="Bulan berikutnya"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+      <button id="calToday" class="btn-soft">Hari ini</button>
+      <div class="cal-legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#F47A8F"></span>Lewat / mendesak</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#F6C268"></span>≤ 30 hari</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#9BD7BB"></span>Aman</span>
+      </div>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-week-head"><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div><div>Min</div></div>
+      <div class="cal-days" id="calDays"></div>
+    </div>
+  </section>
+
+  <!-- REGS -->
+  <section class="view" id="view-regs" hidden>
+    <div class="page-head">
+      <h1 class="page-title">Regulasi &amp; peraturan</h1>
+      <p class="page-desc">Catat peraturan baru begitu ditemukan dan tandai "Baru" agar muncul sebagai pengingat di beranda sampai Anda meninjaunya.</p>
+    </div>
+    <div class="toolbar">
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="text" id="searchRegs" placeholder="Cari nomor, judul, atau kategori peraturan…"></div>
+      <button class="btn-add" id="addReg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Tambah regulasi</button>
+    </div>
+    <div class="chips" id="chipsRegs"></div>
+    <div class="cards" id="listRegs"></div>
+  </section>
+</main>
+
+<!-- DOC MODAL -->
+<div class="overlay" id="docOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="docModalTitle">
+    <div class="modal-head">
+      <h2 id="docModalTitle">Tambah dokumen</h2>
+      <button class="modal-x" data-close="doc" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="docId">
+      <div class="form-section">
+        <div class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>Informasi umum</div>
+        <div class="field"><label for="docNama">Nama proyek / dokumen <span class="req">*</span></label><input class="control" id="docNama" placeholder="mis. AMDAL Pembangunan Pabrik Tekstil"></div>
+        <div class="field row2">
+          <div><label for="docKlien">Klien</label><input class="control" id="docKlien" placeholder="mis. PT Sandang Jaya"></div>
+          <div><label for="docJenis">Jenis dokumen</label><select class="control" id="docJenis"></select></div>
+        </div>
+        <div class="field row2">
+          <div><label for="docStatus">Status</label><select class="control" id="docStatus"></select></div>
+          <div><label for="docPic">Penanggung jawab</label><input class="control" id="docPic" placeholder="mis. Tim Andal / nama"></div>
+        </div>
+        <div class="field row2">
+          <div><label for="docMulai">Tanggal mulai</label><input class="control" type="date" id="docMulai"></div>
+          <div><label for="docDeadline">Deadline</label><input class="control" type="date" id="docDeadline"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 2 2 4-4"/><path d="M9 5h11M9 12h6M9 19h11M5 5h.01M5 12h.01M5 19h.01"/></svg>Tahapan &amp; progres</div>
+        <div class="checklist" id="docTahapanList"></div>
+        <div class="checklist-add"><input class="control" id="docTahapanInput" placeholder="Tambah tahapan baru…"><button class="btn-soft" id="docTahapanAdd" type="button">Tambah</button></div>
+        <button class="btn-link" id="docTahapanTpl" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Gunakan tahapan standar</span></button>
+        <p class="hint">Centang tahapan yang selesai — progres dokumen dihitung otomatis dari sini.</p>
+        <div id="docProgressArea"></div>
+      </div>
+      <div class="form-section">
+        <div class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v4M12 16h.01"/></svg>Catatan</div>
+        <div class="field"><textarea class="control" id="docCatatan" placeholder="mis. Menunggu data kualitas udara dari lab…"></textarea></div>
+      </div>
+      <div class="form-section" id="docHistorySection" hidden>
+        <div class="section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Riwayat status</div>
+        <div class="timeline" id="docHistory"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-del" id="docDelete" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Hapus</button>
+      <button class="btn-ghost" data-close="doc">Batal</button>
+      <button class="btn-primary" id="docSave">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- REG MODAL -->
+<div class="overlay" id="regOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="regModalTitle">
+    <div class="modal-head">
+      <h2 id="regModalTitle">Tambah regulasi</h2>
+      <button class="modal-x" data-close="reg" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="regId">
+      <div class="field row2">
+        <div><label for="regNomor">Nomor peraturan <span class="req">*</span></label><input class="control" id="regNomor" placeholder="mis. PP No. 22 Tahun 2021"></div>
+        <div><label for="regJenis">Jenis</label><select class="control" id="regJenis"></select></div>
+      </div>
+      <div class="field"><label for="regJudul">Judul / tentang</label><input class="control" id="regJudul" placeholder="mis. Penyelenggaraan Perlindungan dan Pengelolaan Lingkungan Hidup"></div>
+      <div class="field row2">
+        <div><label for="regStatus">Status</label><select class="control" id="regStatus"></select></div>
+        <div><label for="regTanggal">Tanggal terbit</label><input class="control" type="date" id="regTanggal"></div>
+      </div>
+      <div class="field row2">
+        <div>
+          <label for="regKategori">Kategori / topik</label>
+          <input class="control" id="regKategori" list="katList" placeholder="mis. Limbah B3">
+          <datalist id="katList"><option>Persetujuan Lingkungan</option><option>AMDAL/UKL-UPL</option><option>PERTEK</option><option>Baku Mutu Air</option><option>Baku Mutu Udara</option><option>Limbah B3</option><option>Pengelolaan Sampah</option><option>Perizinan Berusaha</option><option>Kehutanan</option><option>Iklim &amp; Emisi</option></datalist>
+        </div>
+        <div><label for="regRelevansi">Relevansi</label><select class="control" id="regRelevansi"></select></div>
+      </div>
+      <div class="field"><label for="regSumber">Tautan sumber</label><input class="control" id="regSumber" placeholder="https://… (link peraturan resmi)"></div>
+      <div class="field"><label for="regCatatan">Catatan dampak / tindak lanjut</label><textarea class="control" id="regCatatan" placeholder="mis. Mengubah ketentuan baku mutu — perlu cek proyek X…"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-del" id="regDelete" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Hapus</button>
+      <button class="btn-ghost" data-close="reg">Batal</button>
+      <button class="btn-primary" id="regSave">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span id="toastMsg"></span></div>
+
+<script>
+"use strict";
+
+/* ---------- Constants ---------- */
+const BULAN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const MONTH_FULL=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+const DOC_JENIS=['AMDAL','Adendum AMDAL','UKL-UPL','SPPL','DELH','DPLH','PERTEK','RINTEK','Persetujuan Lingkungan','Lainnya'];
+const DOC_STATUS_LIST=['Penyusunan','Pengumpulan Data','Review Internal','Pengajuan ke Instansi','Revisi','Selesai'];
+const DOC_STATUS_CLS={'Penyusunan':'s-sky','Pengumpulan Data':'s-sky','Review Internal':'s-grape','Pengajuan ke Instansi':'s-sun','Revisi':'s-coral','Selesai':'s-leaf'};
+
+const REG_JENIS=['UU','PP','Perpres','Permen LHK','Kepmen LHK','Perda','SE','Lainnya'];
+const REG_JENIS_COLOR={'UU':'#BCA7E8','PP':'#9BD7BB','Perpres':'#A8C9F0','Permen LHK':'#FBC79B','Kepmen LHK':'#F4B98A','Perda':'#F49CC0','SE':'#C3B2BC','Lainnya':'#C3B2BC'};
+const REG_STATUS_LIST=['Baru','Berlaku','Direvisi','Dicabut'];
+const REG_STATUS_CLS={'Baru':'s-pink','Berlaku':'s-sky','Direvisi':'s-sun','Dicabut':'s-grey'};
+const REL_LIST=['Tinggi','Sedang','Rendah'];
+const REL_CLS={'Tinggi':'s-coral','Sedang':'s-sun','Rendah':'s-grey'};
+
+const DOT_COLOR={'s-sky':'#7FB0E6','s-grape':'#A98FDB','s-sun':'#EBBE5E','s-coral':'#EE8585','s-leaf':'#7FCBA3','s-pink':'#EE8FB5','s-grey':'#C3B2BC'};
+const URG_COLOR={'u-over':{bg:'#FBE2E2',tx:'#B85656',bd:'#F47A8F'},'u-soon':{bg:'#FCF1D6',tx:'#9A7726',bd:'#F6C268'},'u-ok':{bg:'#DFF3E8',tx:'#3E8C66',bd:'#9BD7BB'},'u-far':{bg:'#EFF4F0',tx:'#5E7A6B',bd:'#C5D8C9'},'u-done':{bg:'#F0E8ED',tx:'#90798A',bd:'#DCD2D8'},'u-none':{bg:'#F0E8ED',tx:'#90798A',bd:'#DCD2D8'}};
+
+const TAHAPAN_TEMPLATE={
+  'AMDAL':['Penapisan (screening)','Penyusunan & konsultasi publik KA','Pemeriksaan KA','Penyusunan ANDAL & RKL-RPL','Penilaian / sidang KPA','Penerbitan SKKL & Persetujuan Lingkungan'],
+  'Adendum AMDAL':['Identifikasi perubahan kegiatan','Penyusunan adendum ANDAL & RKL-RPL','Pengajuan ke instansi','Penilaian','Penerbitan persetujuan'],
+  'UKL-UPL':['Penyusunan formulir UKL-UPL','Pemeriksaan administrasi','Pemeriksaan substansi','Perbaikan (bila ada)','Penerbitan PKPLH & Persetujuan Lingkungan'],
+  'SPPL':['Pengisian formulir SPPL','Pendaftaran melalui OSS','Penerbitan SPPL'],
+  'PERTEK':['Penyusunan kajian teknis','Pengajuan permohonan','Verifikasi / penilaian','Perbaikan (bila ada)','Penerbitan PERTEK'],
+  'RINTEK':['Penyusunan rincian teknis','Pengajuan','Verifikasi','Penerbitan persetujuan rintek'],
+  'Persetujuan Lingkungan':['Persiapan dokumen','Pengajuan','Penilaian','Penerbitan persetujuan'],
+  'DELH':['Penyusunan DELH','Pemeriksaan','Penerbitan persetujuan'],
+  'DPLH':['Penyusunan DPLH','Pemeriksaan','Penerbitan persetujuan'],
+  'Lainnya':['Persiapan','Penyusunan','Review internal','Pengajuan','Selesai']
+};
+
+/* ---------- State ---------- */
+const state={docs:[],regs:[],tab:'dashboard',docFilter:'Semua',regFilter:'Semua',docQuery:'',regQuery:'',calYear:0,calMonth:0};
+let editTahapan=[],modalManualProgress=0,lastFocus=null;
+
+/* ---------- Icons ---------- */
+const IC={
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>',
+  folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>',
+  book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 2 2 4-4"/><path d="M9 5h11M5 5h.01"/></svg>'
+};
+
+/* ---------- Helpers ---------- */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function localISO(d){const p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());}
+function offsetDate(n){const d=new Date();d.setDate(d.getDate()+n);return localISO(d);}
+function offsetDateTime(daysAgo){const d=new Date();d.setDate(d.getDate()-daysAgo);return d.toISOString();}
+function fmtDate(s){if(!s)return '—';const d=new Date(s+'T00:00:00');if(isNaN(d))return '—';return d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();}
+function fmtDateTime(ts){const d=new Date(ts);if(isNaN(d))return '—';const p=n=>String(n).padStart(2,'0');return d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear()+' · '+p(d.getHours())+':'+p(d.getMinutes());}
+function daysUntil(s){if(!s)return null;const t=new Date();t.setHours(0,0,0,0);const d=new Date(s+'T00:00:00');d.setHours(0,0,0,0);return Math.round((d-t)/86400000);}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function fillSelect(el,arr){el.innerHTML=arr.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('');}
+
+function urgency(doc){
+  if(doc.status==='Selesai')return {cls:'u-done',label:'Selesai',rank:99};
+  const d=daysUntil(doc.deadline);
+  if(d===null)return {cls:'u-none',label:'Tanpa deadline',rank:50};
+  if(d<0)return {cls:'u-over',label:'Lewat '+Math.abs(d)+' hari',rank:0};
+  if(d===0)return {cls:'u-over',label:'Jatuh tempo hari ini',rank:0};
+  if(d<=7)return {cls:'u-soon',label:d+' hari lagi',rank:1};
+  if(d<=30)return {cls:'u-ok',label:d+' hari lagi',rank:2};
+  return {cls:'u-far',label:d+' hari lagi',rank:3};
+}
+function isUrgent(doc){if(doc.status==='Selesai')return false;const d=daysUntil(doc.deadline);return d!==null&&d<=7;}
+function docProgressValue(d){const t=d.tahapan||[];if(t.length)return Math.round(t.filter(x=>x.done).length/t.length*100);return d.progress||0;}
+function progressLabel(d){const t=d.tahapan||[];if(t.length)return t.filter(x=>x.done).length+' / '+t.length+' tahapan';return 'Progres';}
+function mkTahapan(jenis,done){return (TAHAPAN_TEMPLATE[jenis]||[]).map((label,i)=>({label,done:i<done}));}
+
+/* ---------- Storage (key prefix kept for data continuity) ---------- */
+function hasStore(){return typeof window!=='undefined'&&window.storage&&typeof window.storage.get==='function';}
+async function sget(k){
+  if(hasStore()){try{return await window.storage.get(k,false);}catch(e){}}
+  try{const v=localStorage.getItem(k);return v===null?null:{value:v};}catch(e){return null;}
+}
+async function sset(k,v){
+  if(hasStore()){try{await window.storage.set(k,v,false);return;}catch(e){}}
+  try{localStorage.setItem(k,v);}catch(e){}
+}
+async function persist(){await sset('ekolacak:docs',JSON.stringify(state.docs));await sset('ekolacak:regs',JSON.stringify(state.regs));}
+
+function normDoc(d){return Object.assign({klien:'',jenis:'Lainnya',status:'Penyusunan',mulai:'',deadline:'',progress:0,pic:'',catatan:''},d,{tahapan:Array.isArray(d.tahapan)?d.tahapan:[],history:Array.isArray(d.history)?d.history:[]});}
+
+function seedSample(){
+  state.regs=[
+    {id:uid(),nomor:'(Contoh) Peraturan baru bulan ini',judul:'Ganti entri ini dengan regulasi baru yang Anda temukan hari ini',jenis:'Permen LHK',tanggal:offsetDate(-3),status:'Baru',kategori:'Perizinan Berusaha',relevansi:'Sedang',sumber:'',catatan:'Contoh entri berstatus "Baru". Hapus lalu isi dengan peraturan sungguhan saat ditemukan.'},
+    {id:uid(),nomor:'PP No. 22 Tahun 2021',judul:'Penyelenggaraan Perlindungan dan Pengelolaan Lingkungan Hidup',jenis:'PP',tanggal:'2021-02-02',status:'Berlaku',kategori:'Persetujuan Lingkungan',relevansi:'Tinggi',sumber:'',catatan:'Acuan utama Persetujuan Lingkungan, baku mutu, dan pengelolaan limbah B3.'},
+    {id:uid(),nomor:'Permen LHK No. 4 Tahun 2021',judul:'Daftar Usaha dan/atau Kegiatan yang Wajib AMDAL, UKL-UPL, atau SPPL',jenis:'Permen LHK',tanggal:'2021-03-02',status:'Berlaku',kategori:'AMDAL/UKL-UPL',relevansi:'Tinggi',sumber:'',catatan:'Dipakai untuk menentukan jenis dokumen lingkungan tiap kegiatan.'},
+    {id:uid(),nomor:'Permen LHK No. 5 Tahun 2021',judul:'Tata Cara Penerbitan Persetujuan Teknis dan Surat Kelayakan Operasional',jenis:'Permen LHK',tanggal:'2021-04-01',status:'Berlaku',kategori:'PERTEK',relevansi:'Sedang',sumber:'',catatan:'Dasar PERTEK air limbah, emisi, dan limbah B3.'},
+    {id:uid(),nomor:'UU No. 6 Tahun 2023',judul:'Penetapan Perppu Cipta Kerja Menjadi Undang-Undang',jenis:'UU',tanggal:'2023-03-31',status:'Berlaku',kategori:'Perizinan Berusaha',relevansi:'Tinggi',sumber:'',catatan:'Mengubah sejumlah ketentuan perizinan termasuk sektor lingkungan.'},
+    {id:uid(),nomor:'UU No. 32 Tahun 2009',judul:'Perlindungan dan Pengelolaan Lingkungan Hidup',jenis:'UU',tanggal:'2009-10-03',status:'Direvisi',kategori:'Persetujuan Lingkungan',relevansi:'Tinggi',sumber:'',catatan:'Sebagian ketentuan diubah oleh UU Cipta Kerja.'}
+  ];
+  state.docs=[
+    normDoc({id:uid(),nama:'AMDAL Pembangunan Pabrik Tekstil',klien:'PT Sandang Jaya Nusantara',jenis:'AMDAL',status:'Penyusunan',mulai:offsetDate(-20),deadline:offsetDate(12),pic:'Tim Andal',tahapan:mkTahapan('AMDAL',2),catatan:'Menunggu data kualitas udara ambien dari lab.',history:[{ts:offsetDateTime(20),to:'Penyusunan',note:'Dibuat'}]}),
+    normDoc({id:uid(),nama:'UKL-UPL Gudang Logistik Cikampek',klien:'PT Cipta Logistik Prima',jenis:'UKL-UPL',status:'Review Internal',mulai:offsetDate(-30),deadline:offsetDate(5),pic:'Rian',tahapan:mkTahapan('UKL-UPL',3),catatan:'Review akhir sebelum diserahkan ke klien.',history:[{ts:offsetDateTime(30),to:'Penyusunan',note:'Dibuat'},{ts:offsetDateTime(6),from:'Penyusunan',to:'Review Internal'}]}),
+    normDoc({id:uid(),nama:'Adendum AMDAL Perluasan Area Tambang',klien:'PT Bumi Mineral Sejahtera',jenis:'Adendum AMDAL',status:'Pengajuan ke Instansi',mulai:offsetDate(-60),deadline:offsetDate(-2),pic:'Tim Andal',tahapan:mkTahapan('Adendum AMDAL',3),catatan:'Sudah diajukan, menunggu jadwal sidang KPA.',history:[{ts:offsetDateTime(60),to:'Penyusunan',note:'Dibuat'},{ts:offsetDateTime(12),from:'Penyusunan',to:'Review Internal'},{ts:offsetDateTime(5),from:'Review Internal',to:'Pengajuan ke Instansi'}]}),
+    normDoc({id:uid(),nama:'PERTEK Pemenuhan Baku Mutu Air Limbah',klien:'PT Graha Wisata Hotel',jenis:'PERTEK',status:'Revisi',mulai:offsetDate(-25),deadline:offsetDate(25),pic:'Rian',tahapan:mkTahapan('PERTEK',2),catatan:'Revisi neraca air sesuai arahan verifikator.',history:[{ts:offsetDateTime(25),to:'Penyusunan',note:'Dibuat'},{ts:offsetDateTime(8),from:'Pengajuan ke Instansi',to:'Revisi'}]}),
+    normDoc({id:uid(),nama:'SPPL Bengkel Kendaraan Bermotor',klien:'CV Mitra Otomotif',jenis:'SPPL',status:'Selesai',mulai:offsetDate(-40),deadline:offsetDate(-10),pic:'Dewi',tahapan:mkTahapan('SPPL',3),catatan:'NIB dan SPPL sudah terbit.',history:[{ts:offsetDateTime(40),to:'Penyusunan',note:'Dibuat'},{ts:offsetDateTime(11),from:'Pengajuan ke Instansi',to:'Selesai'}]}),
+    normDoc({id:uid(),nama:'UKL-UPL Perumahan Subsidi',klien:'PT Karya Griya Persada',jenis:'UKL-UPL',status:'Penyusunan',mulai:offsetDate(-10),deadline:offsetDate(58),pic:'Dewi',tahapan:mkTahapan('UKL-UPL',1),catatan:'',history:[{ts:offsetDateTime(10),to:'Penyusunan',note:'Dibuat'}]})
+  ];
+}
+
+async function loadData(){
+  const seededRec=await sget('ekolacak:seeded');
+  if(seededRec&&seededRec.value){
+    const d=await sget('ekolacak:docs'),r=await sget('ekolacak:regs');
+    try{state.regs=r?JSON.parse(r.value):[];}catch(e){state.regs=[];}
+    try{state.docs=(d?JSON.parse(d.value):[]).map(normDoc);}catch(e){state.docs=[];}
+    const bn=await sget('ekolacak:bannerHidden');if(bn&&bn.value==='1'){const b=document.getElementById('banner');if(b)b.remove();}
+  }else{
+    seedSample();
+    await sset('ekolacak:seeded','3');
+    await persist();
+  }
+}
+
+/* ---------- Toast ---------- */
+let toastT;
+function toast(msg){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ---------- Dashboard ---------- */
+function renderDashboard(){
+  const aktif=state.docs.filter(d=>d.status!=='Selesai').length;
+  const mendesak=state.docs.filter(isUrgent).length;
+  const baru=state.regs.filter(r=>r.status==='Baru').length;
+  const selesai=state.docs.filter(d=>d.status==='Selesai').length;
+  document.getElementById('stats').innerHTML=[
+    statCard('mint',IC.folder,aktif,'Dokumen aktif'),
+    statCard('coral',IC.cal,mendesak,'Deadline mendesak'),
+    statCard('pink',IC.book,baru,'Regulasi baru'),
+    statCard('lavender',IC.check,selesai,'Sudah selesai')
+  ].join('');
+
+  const dl=state.docs.filter(d=>d.status!=='Selesai'&&d.deadline).sort((a,b)=>daysUntil(a.deadline)-daysUntil(b.deadline)).slice(0,5);
+  document.getElementById('cntDeadline').textContent=dl.length?dl.length+' dokumen':'';
+  document.getElementById('panelDeadline').innerHTML=dl.length?dl.map(d=>{
+    const u=urgency(d),c=URG_COLOR[u.cls];
+    return '<div class="mini" data-open="'+d.id+'" style="--spine:'+c.bd+'"><div class="mini-body"><div class="mini-title">'+esc(d.nama)+'</div><div class="mini-meta">'+esc(d.klien||'—')+' · '+fmtDate(d.deadline)+'</div></div><div class="mini-right"><span class="up '+u.cls+'">'+u.label+'</span></div></div>';
+  }).join(''):'<div class="panel-empty">Tidak ada deadline aktif.</div>';
+
+  const rg=state.regs.filter(r=>r.status==='Baru'||r.relevansi==='Tinggi').sort((a,b)=>new Date(b.tanggal||0)-new Date(a.tanggal||0)).slice(0,5);
+  document.getElementById('cntRegs').textContent=rg.length?rg.length+' peraturan':'';
+  document.getElementById('panelRegs').innerHTML=rg.length?rg.map(r=>{
+    const c=REG_STATUS_CLS[r.status]||'s-grey';
+    return '<div class="mini" data-openreg="'+r.id+'" style="--spine:'+(REG_JENIS_COLOR[r.jenis]||'#C3B2BC')+'"><div class="mini-body"><div class="mini-title">'+esc(r.nomor)+'</div><div class="mini-meta">'+esc(r.judul||'—')+'</div></div><div class="mini-right"><span class="pill '+c+'">'+esc(r.status)+'</span></div></div>';
+  }).join(''):'<div class="panel-empty">Belum ada regulasi yang ditandai.</div>';
+}
+function statCard(cls,ic,num,label){return '<div class="stat '+cls+'"><div class="stat-ic">'+ic+'</div><div class="stat-num">'+num+'</div><div class="stat-label">'+label+'</div></div>';}
+
+/* ---------- Docs ---------- */
+function renderDocs(){
+  const counts={'Semua':state.docs.length};
+  DOC_STATUS_LIST.forEach(s=>counts[s]=state.docs.filter(d=>d.status===s).length);
+  document.getElementById('chipsDocs').innerHTML=['Semua',...DOC_STATUS_LIST].map(f=>'<button class="chip'+(state.docFilter===f?' active':'')+'" data-docfilter="'+esc(f)+'">'+esc(f)+' <span class="c-num">'+(counts[f]||0)+'</span></button>').join('');
+  const q=state.docQuery.toLowerCase();
+  let list=state.docs.filter(d=>state.docFilter==='Semua'||d.status===state.docFilter);
+  if(q)list=list.filter(d=>((d.nama||'')+(d.klien||'')+(d.jenis||'')+(d.pic||'')).toLowerCase().includes(q));
+  list.sort((a,b)=>urgency(a).rank-urgency(b).rank||(daysUntil(a.deadline)??9e9)-(daysUntil(b.deadline)??9e9));
+  const el=document.getElementById('listDocs');
+  if(!list.length){el.innerHTML=emptyState(IC.folder,state.docs.length?'Tidak ada yang cocok':'Belum ada dokumen',state.docs.length?'Coba ubah kata kunci atau filter status.':'Klik "Tambah dokumen" untuk mulai melacak proyek beserta deadline-nya.');return;}
+  el.innerHTML=list.map(docCard).join('');
+}
+function docCard(d){
+  const u=urgency(d),st=DOC_STATUS_CLS[d.status]||'s-grey',pct=docProgressValue(d);
+  return '<article class="card doc-card '+u.cls+'" data-id="'+d.id+'" tabindex="0">'
+    +'<div class="card-main">'
+      +'<div class="card-top"><span class="pill '+st+'"><span class="pdot"></span>'+esc(d.status)+'</span><span class="jenis-tag">'+esc(d.jenis||'—')+'</span></div>'
+      +'<h3 class="card-title">'+esc(d.nama)+'</h3>'
+      +'<p class="card-klien">'+esc(d.klien||'Tanpa klien')+'</p>'
+      +'<div class="progress-meta"><span>'+progressLabel(d)+'</span><span class="mono">'+pct+'%</span></div>'
+      +'<div class="progress"><div class="progress-bar" style="width:'+pct+'%"></div></div>'
+      +'<div class="card-meta"><span class="meta mono">'+IC.cal+fmtDate(d.deadline)+'</span><span class="up '+u.cls+'">'+u.label+'</span>'+(d.pic?'<span class="meta">'+IC.user+esc(d.pic)+'</span>':'')+'</div>'
+    +'</div>'
+    +'<button class="card-edit" tabindex="-1" aria-label="Edit">'+IC.edit+'</button></article>';
+}
+
+/* ---------- Regs ---------- */
+function renderRegs(){
+  const counts={'Semua':state.regs.length};
+  REG_STATUS_LIST.forEach(s=>counts[s]=state.regs.filter(r=>r.status===s).length);
+  document.getElementById('chipsRegs').innerHTML=['Semua',...REG_STATUS_LIST].map(f=>'<button class="chip'+(state.regFilter===f?' active':'')+'" data-regfilter="'+esc(f)+'">'+esc(f)+' <span class="c-num">'+(counts[f]||0)+'</span></button>').join('');
+  const q=state.regQuery.toLowerCase();
+  let list=state.regs.filter(r=>state.regFilter==='Semua'||r.status===state.regFilter);
+  if(q)list=list.filter(r=>((r.nomor||'')+(r.judul||'')+(r.kategori||'')+(r.jenis||'')).toLowerCase().includes(q));
+  list.sort((a,b)=>new Date(b.tanggal||0)-new Date(a.tanggal||0));
+  const el=document.getElementById('listRegs');
+  if(!list.length){el.innerHTML=emptyState(IC.book,state.regs.length?'Tidak ada yang cocok':'Belum ada regulasi',state.regs.length?'Coba ubah kata kunci atau filter status.':'Tambahkan peraturan agar tidak ada yang terlewat.');return;}
+  el.innerHTML=list.map(regCard).join('');
+}
+function regCard(r){
+  const st=REG_STATUS_CLS[r.status]||'s-grey',rel=REL_CLS[r.relevansi]||'s-grey',color=REG_JENIS_COLOR[r.jenis]||'#C3B2BC';
+  return '<article class="card reg-card" data-id="'+r.id+'" tabindex="0" style="--spine:'+color+'">'
+    +'<div class="card-main">'
+      +'<div class="card-top"><span class="pill '+st+'"><span class="pdot"></span>'+esc(r.status)+'</span>'+(r.relevansi?'<span class="pill '+rel+'">Relevansi '+esc(r.relevansi)+'</span>':'')+'<span class="jenis-tag">'+esc(r.jenis||'—')+'</span>'+(r.kategori?'<span class="jenis-tag">'+esc(r.kategori)+'</span>':'')+'</div>'
+      +'<p class="reg-nomor mono">'+esc(r.nomor||'—')+'</p>'
+      +'<h3 class="card-title">'+esc(r.judul||'Tanpa judul')+'</h3>'
+      +'<div class="card-meta"><span class="meta mono">'+IC.cal+fmtDate(r.tanggal)+'</span>'+(r.sumber?'<a class="meta link" href="'+esc(r.sumber)+'" target="_blank" rel="noopener">'+IC.folder+'Buka sumber</a>':'')+'</div>'
+      +(r.catatan?'<p class="reg-note">'+esc(r.catatan)+'</p>':'')
+    +'</div>'
+    +'<button class="card-edit" tabindex="-1" aria-label="Edit">'+IC.edit+'</button></article>';
+}
+
+function emptyState(ic,t,d){return '<div class="empty"><div class="empty-ic">'+ic+'</div><h3>'+esc(t)+'</h3><p>'+esc(d)+'</p></div>';}
+
+/* ---------- Calendar ---------- */
+function renderCalendar(){
+  const y=state.calYear,m=state.calMonth;
+  document.getElementById('calMonth').textContent=MONTH_FULL[m]+' '+y;
+  const ev={};
+  state.docs.forEach(d=>{if(d.deadline){(ev[d.deadline]=ev[d.deadline]||[]).push({id:d.id,name:d.nama,u:urgency(d)});}});
+  const first=new Date(y,m,1);
+  const start=new Date(y,m,1-((first.getDay()+6)%7));
+  const todayStr=localISO(new Date());
+  let html='';
+  for(let i=0;i<42;i++){
+    const dt=new Date(start);dt.setDate(start.getDate()+i);
+    const ds=localISO(dt),other=dt.getMonth()!==m,today=ds===todayStr,list=ev[ds]||[];
+    let chips='';
+    list.slice(0,3).forEach(e=>{const c=URG_COLOR[e.u.cls]||URG_COLOR['u-far'];chips+='<div class="cal-event" data-doc="'+e.id+'" title="'+esc(e.name)+' — '+e.u.label+'" style="--ev:'+c.bd+';background:'+c.bg+';color:'+c.tx+'">'+esc(e.name)+'</div>';});
+    if(list.length>3)chips+='<div class="cal-more">+'+(list.length-3)+' lagi</div>';
+    html+='<div class="cal-day'+(other?' other':'')+(today?' today':'')+'"><span class="cal-daynum">'+dt.getDate()+'</span>'+chips+'</div>';
+  }
+  document.getElementById('calDays').innerHTML=html;
+}
+
+/* ---------- Badges & render ---------- */
+function renderBadges(){
+  const md=state.docs.filter(isUrgent).length,nb=state.regs.filter(r=>r.status==='Baru').length;
+  const bd=document.getElementById('badgeDocs');bd.textContent=md;bd.dataset.count=md;
+  const br=document.getElementById('badgeRegs');br.textContent=nb;br.dataset.count=nb;
+}
+function renderAll(){renderBadges();
+  if(state.tab==='dashboard')renderDashboard();
+  else if(state.tab==='docs')renderDocs();
+  else if(state.tab==='cal')renderCalendar();
+  else renderRegs();
+}
+function switchTab(tab){
+  state.tab=tab;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  ['dashboard','docs','cal','regs'].forEach(t=>document.getElementById('view-'+t).hidden=tab!==t);
+  window.scrollTo({top:0,behavior:'auto'});
+  renderAll();
+}
+
+/* ---------- Tahapan UI ---------- */
+function renderTahapan(){
+  const list=document.getElementById('docTahapanList');
+  if(!editTahapan.length){list.innerHTML='<div class="checklist-empty">Belum ada tahapan. Tambah manual di bawah, atau muat tahapan standar.</div>';}
+  else{list.innerHTML=editTahapan.map((t,i)=>'<label class="check-item"><input type="checkbox" data-idx="'+i+'"'+(t.done?' checked':'')+'><span class="check-label'+(t.done?' done':'')+'">'+esc(t.label)+'</span><button type="button" class="check-del" data-del="'+i+'" aria-label="Hapus tahapan">&times;</button></label>').join('');}
+  renderProgressArea();
+}
+function renderProgressArea(){
+  const area=document.getElementById('docProgressArea');
+  if(editTahapan.length){
+    const done=editTahapan.filter(t=>t.done).length,pct=Math.round(done/editTahapan.length*100);
+    area.innerHTML='<div class="prog-computed"><div class="prog-row"><span>'+done+' dari '+editTahapan.length+' tahapan selesai</span><span class="mono">'+pct+'%</span></div><div class="progress"><div class="progress-bar" style="width:'+pct+'%"></div></div></div>';
+  }else{
+    area.innerHTML='<div class="range-wrap"><input type="range" id="docProgress" min="0" max="100" step="5" value="'+modalManualProgress+'"><span class="range-val" id="docProgressVal">'+modalManualProgress+'%</span></div>';
+    const r=document.getElementById('docProgress');
+    r.addEventListener('input',e=>{modalManualProgress=+e.target.value;document.getElementById('docProgressVal').textContent=modalManualProgress+'%';});
+  }
+}
+function renderHistory(d){
+  const sec=document.getElementById('docHistorySection');
+  const h=(d&&d.history)?d.history.slice():[];
+  if(!h.length){sec.hidden=true;return;}
+  sec.hidden=false;
+  h.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  document.getElementById('docHistory').innerHTML=h.map(e=>{
+    const cls=DOC_STATUS_CLS[e.to]||'s-grey',color=DOT_COLOR[cls]||'#C3B2BC';
+    const main=e.from?(esc(e.from)+' → '+esc(e.to)):('Dibuat sebagai '+esc(e.to));
+    return '<div class="tl-item"><span class="tl-dot" style="background:'+color+'"></span><div><div class="tl-main">'+main+'</div><div class="tl-date mono">'+fmtDateTime(e.ts)+'</div></div></div>';
+  }).join('');
+}
+function addTahapan(){const inp=document.getElementById('docTahapanInput');const v=inp.value.trim();if(!v)return;editTahapan.push({label:v,done:false});inp.value='';renderTahapan();inp.focus();}
+
+/* ---------- Doc Modal ---------- */
+const docOverlay=document.getElementById('docOverlay');
+function setTplLabel(){const j=document.getElementById('docJenis').value;document.querySelector('#docTahapanTpl span').textContent='Gunakan tahapan standar: '+j;}
+function openDocModal(id){
+  lastFocus=document.activeElement;
+  const d=id?state.docs.find(x=>x.id===id):null;
+  document.getElementById('docModalTitle').textContent=d?'Edit dokumen':'Tambah dokumen';
+  document.getElementById('docId').value=d?d.id:'';
+  document.getElementById('docNama').value=d?d.nama:'';
+  document.getElementById('docKlien').value=d?(d.klien||''):'';
+  document.getElementById('docJenis').value=d?(d.jenis||DOC_JENIS[0]):DOC_JENIS[0];
+  document.getElementById('docStatus').value=d?(d.status||DOC_STATUS_LIST[0]):DOC_STATUS_LIST[0];
+  document.getElementById('docPic').value=d?(d.pic||''):'';
+  document.getElementById('docMulai').value=d?(d.mulai||''):'';
+  document.getElementById('docDeadline').value=d?(d.deadline||''):'';
+  document.getElementById('docCatatan').value=d?(d.catatan||''):'';
+  modalManualProgress=d?(d.progress||0):0;
+  editTahapan=(d&&d.tahapan)?d.tahapan.map(t=>({label:t.label,done:!!t.done})):[];
+  setTplLabel();renderTahapan();renderHistory(d);
+  document.getElementById('docDelete').hidden=!d;
+  openOverlay(docOverlay,'docNama');
+}
+function saveDoc(){
+  const nama=document.getElementById('docNama').value.trim();
+  if(!nama){const f=document.getElementById('docNama');f.focus();f.style.borderColor='var(--coral)';return;}
+  const id=document.getElementById('docId').value,status=document.getElementById('docStatus').value;
+  const data={nama,klien:document.getElementById('docKlien').value.trim(),jenis:document.getElementById('docJenis').value,status,pic:document.getElementById('docPic').value.trim(),mulai:document.getElementById('docMulai').value,deadline:document.getElementById('docDeadline').value,progress:modalManualProgress,tahapan:editTahapan.map(t=>({label:t.label,done:!!t.done})),catatan:document.getElementById('docCatatan').value.trim()};
+  if(id){
+    const i=state.docs.findIndex(x=>x.id===id),old=state.docs[i],history=(old.history||[]).slice();
+    if(old.status!==status)history.push({ts:new Date().toISOString(),from:old.status,to:status});
+    state.docs[i]=normDoc(Object.assign({},old,data,{history}));
+    toast('Dokumen diperbarui');
+  }else{
+    state.docs.push(normDoc(Object.assign({id:uid()},data,{history:[{ts:new Date().toISOString(),to:status,note:'Dibuat'}]})));
+    toast('Dokumen ditambahkan');
+  }
+  persist();closeOverlay(docOverlay);renderAll();
+}
+function deleteDoc(){
+  const id=document.getElementById('docId').value;if(!id)return;
+  if(!confirm('Hapus dokumen ini? Tindakan ini tidak dapat dibatalkan.'))return;
+  state.docs=state.docs.filter(x=>x.id!==id);toast('Dokumen dihapus');
+  persist();closeOverlay(docOverlay);renderAll();
+}
+
+/* ---------- Reg Modal ---------- */
+const regOverlay=document.getElementById('regOverlay');
+function openRegModal(id){
+  lastFocus=document.activeElement;
+  const r=id?state.regs.find(x=>x.id===id):null;
+  document.getElementById('regModalTitle').textContent=r?'Edit regulasi':'Tambah regulasi';
+  document.getElementById('regId').value=r?r.id:'';
+  document.getElementById('regNomor').value=r?(r.nomor||''):'';
+  document.getElementById('regJenis').value=r?(r.jenis||'Permen LHK'):'Permen LHK';
+  document.getElementById('regJudul').value=r?(r.judul||''):'';
+  document.getElementById('regStatus').value=r?(r.status||'Baru'):'Baru';
+  document.getElementById('regTanggal').value=r?(r.tanggal||''):offsetDate(0);
+  document.getElementById('regKategori').value=r?(r.kategori||''):'';
+  document.getElementById('regRelevansi').value=r?(r.relevansi||REL_LIST[1]):REL_LIST[1];
+  document.getElementById('regSumber').value=r?(r.sumber||''):'';
+  document.getElementById('regCatatan').value=r?(r.catatan||''):'';
+  document.getElementById('regDelete').hidden=!r;
+  openOverlay(regOverlay,'regNomor');
+}
+function saveReg(){
+  const nomor=document.getElementById('regNomor').value.trim();
+  if(!nomor){const f=document.getElementById('regNomor');f.focus();f.style.borderColor='var(--coral)';return;}
+  const id=document.getElementById('regId').value;
+  const data={nomor,jenis:document.getElementById('regJenis').value,judul:document.getElementById('regJudul').value.trim(),status:document.getElementById('regStatus').value,tanggal:document.getElementById('regTanggal').value,kategori:document.getElementById('regKategori').value.trim(),relevansi:document.getElementById('regRelevansi').value,sumber:document.getElementById('regSumber').value.trim(),catatan:document.getElementById('regCatatan').value.trim()};
+  if(id){const i=state.regs.findIndex(x=>x.id===id);state.regs[i]=Object.assign({},state.regs[i],data);toast('Regulasi diperbarui');}
+  else{state.regs.push(Object.assign({id:uid()},data));toast('Regulasi ditambahkan');}
+  persist();closeOverlay(regOverlay);renderAll();
+}
+function deleteReg(){
+  const id=document.getElementById('regId').value;if(!id)return;
+  if(!confirm('Hapus regulasi ini? Tindakan ini tidak dapat dibatalkan.'))return;
+  state.regs=state.regs.filter(x=>x.id!==id);toast('Regulasi dihapus');
+  persist();closeOverlay(regOverlay);renderAll();
+}
+
+/* ---------- Overlay utils ---------- */
+function openOverlay(ov,focusId){ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>{const f=document.getElementById(focusId);if(f){f.focus();f.style.borderColor='';}},60);}
+function closeOverlay(ov){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';if(lastFocus&&lastFocus.focus)lastFocus.focus();}
+
+/* ---------- Events ---------- */
+function bind(){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+  document.getElementById('addDoc').addEventListener('click',()=>openDocModal(null));
+  document.getElementById('addReg').addEventListener('click',()=>openRegModal(null));
+  document.getElementById('docSave').addEventListener('click',saveDoc);
+  document.getElementById('docDelete').addEventListener('click',deleteDoc);
+  document.getElementById('regSave').addEventListener('click',saveReg);
+  document.getElementById('regDelete').addEventListener('click',deleteReg);
+
+  // tahapan
+  document.getElementById('docJenis').addEventListener('change',setTplLabel);
+  document.getElementById('docTahapanAdd').addEventListener('click',addTahapan);
+  document.getElementById('docTahapanInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addTahapan();}});
+  document.getElementById('docTahapanTpl').addEventListener('click',()=>{
+    const j=document.getElementById('docJenis').value,tpl=TAHAPAN_TEMPLATE[j]||TAHAPAN_TEMPLATE['Lainnya'];
+    if(editTahapan.length&&!confirm('Ganti daftar tahapan saat ini dengan tahapan standar "'+j+'"?'))return;
+    editTahapan=tpl.map(l=>({label:l,done:false}));renderTahapan();
+  });
+  document.getElementById('docTahapanList').addEventListener('change',e=>{const i=e.target.dataset.idx;if(i!==undefined){editTahapan[+i].done=e.target.checked;renderTahapan();}});
+  document.getElementById('docTahapanList').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(b){editTahapan.splice(+b.dataset.del,1);renderTahapan();}});
+
+  // close
+  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeOverlay(b.dataset.close==='doc'?docOverlay:regOverlay)));
+  [docOverlay,regOverlay].forEach(ov=>ov.addEventListener('mousedown',e=>{if(e.target===ov)closeOverlay(ov);}));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(docOverlay.classList.contains('open'))closeOverlay(docOverlay);if(regOverlay.classList.contains('open'))closeOverlay(regOverlay);}});
+
+  // lists
+  document.getElementById('listDocs').addEventListener('click',e=>{if(e.target.closest('a'))return;const c=e.target.closest('.card');if(c)openDocModal(c.dataset.id);});
+  document.getElementById('listDocs').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('card')){e.preventDefault();openDocModal(e.target.dataset.id);}});
+  document.getElementById('listRegs').addEventListener('click',e=>{if(e.target.closest('a'))return;const c=e.target.closest('.card');if(c)openRegModal(c.dataset.id);});
+  document.getElementById('listRegs').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('card')){e.preventDefault();openRegModal(e.target.dataset.id);}});
+
+  // chips & search
+  document.getElementById('chipsDocs').addEventListener('click',e=>{const c=e.target.closest('[data-docfilter]');if(c){state.docFilter=c.dataset.docfilter;renderDocs();}});
+  document.getElementById('chipsRegs').addEventListener('click',e=>{const c=e.target.closest('[data-regfilter]');if(c){state.regFilter=c.dataset.regfilter;renderRegs();}});
+  document.getElementById('searchDocs').addEventListener('input',e=>{state.docQuery=e.target.value;renderDocs();});
+  document.getElementById('searchRegs').addEventListener('input',e=>{state.regQuery=e.target.value;renderRegs();});
+
+  // dashboard mini -> open
+  document.querySelector('main').addEventListener('click',e=>{
+    const od=e.target.closest('[data-open]');if(od){openDocModal(od.dataset.open);return;}
+    const orr=e.target.closest('[data-openreg]');if(orr){openRegModal(orr.dataset.openreg);}
+  });
+
+  // calendar
+  document.getElementById('calPrev').addEventListener('click',()=>{state.calMonth--;if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar();});
+  document.getElementById('calNext').addEventListener('click',()=>{state.calMonth++;if(state.calMonth>11){state.calMonth=0;state.calYear++;}renderCalendar();});
+  document.getElementById('calToday').addEventListener('click',()=>{const n=new Date();state.calYear=n.getFullYear();state.calMonth=n.getMonth();renderCalendar();});
+  document.getElementById('calDays').addEventListener('click',e=>{const ev=e.target.closest('[data-doc]');if(ev)openDocModal(ev.dataset.doc);});
+
+  // banner
+  const bx=document.getElementById('bannerX');
+  if(bx)bx.addEventListener('click',()=>{const b=document.getElementById('banner');if(b)b.remove();sset('ekolacak:bannerHidden','1');});
+}
+
+/* ---------- Init ---------- */
+(async function init(){
+  fillSelect(document.getElementById('docJenis'),DOC_JENIS);
+  fillSelect(document.getElementById('docStatus'),DOC_STATUS_LIST);
+  fillSelect(document.getElementById('regJenis'),REG_JENIS);
+  fillSelect(document.getElementById('regStatus'),REG_STATUS_LIST);
+  fillSelect(document.getElementById('regRelevansi'),REL_LIST);
+  const n=new Date();state.calYear=n.getFullYear();state.calMonth=n.getMonth();
+  bind();
+  await loadData();
+  renderAll();
+})();
+</script>
+</body>
+</html>
