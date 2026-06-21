@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Aca Space — Pelacak Dokumen & Regulasi Lingkungan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,6 +74,10 @@ a{color:inherit;text-decoration:none}
 .nav-badge{min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--coral);color:#fff;font-size:.68rem;font-weight:700;display:inline-grid;place-items:center;line-height:1}
 .nav-badge.pink{background:var(--pink-deep)}
 .nav-badge[data-count="0"]{display:none}
+.sync{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:10px;font-size:.78rem;font-weight:700;color:var(--ink-soft);background:var(--surface-2);white-space:nowrap;flex:0 0 auto}
+.sync .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--sc,#90798A);transition:background .2s}
+.sync.clickable{cursor:pointer}
+.sync.clickable:hover{background:var(--line);color:var(--ink)}
 
 /* ============ LAYOUT ============ */
 main{max-width:1180px;margin:0 auto;padding:30px 22px 80px}
@@ -209,6 +216,23 @@ main{max-width:1180px;margin:0 auto;padding:30px 22px 80px}
 .cal-event{font-size:.71rem;font-weight:600;padding:3px 6px;border-radius:6px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid var(--ev,#ccc);background:var(--evbg,#f3f3f3);color:var(--evtx,#333)}
 .cal-event:hover{filter:brightness(.97)}
 .cal-more{font-size:.7rem;color:var(--ink-soft);padding:1px 6px;font-weight:600}
+.cal-meet{border-left-color:#9A7BD6;background:#EDE6FA;color:#5B4794}
+.upcoming{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden}
+.up-head{display:flex;align-items:center;gap:9px;padding:15px 18px 11px;font-weight:700;font-size:1rem;border-bottom:1px solid var(--line)}
+.up-head .panel-dot{width:9px;height:9px;border-radius:50%;background:#9A7BD6;flex:none}
+.up-list{padding:6px 10px 10px}
+.up-row{display:flex;align-items:center;gap:13px;padding:11px 8px;border-radius:11px;cursor:pointer;transition:background .12s}
+.up-row:hover{background:var(--surface-2)}
+.up-date{flex:none;width:48px;text-align:center;background:var(--surface-2);border-radius:10px;padding:6px 0;line-height:1.1}
+.up-d{display:block;font-weight:800;font-size:1.05rem}
+.up-m{display:block;font-size:.66rem;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.up-body{flex:1;min-width:0}
+.up-title{font-weight:600;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.up-sub{font-size:.78rem;color:var(--ink-soft);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.up-join{flex:none;display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:9px;background:#EDE6FA;color:#6B52A8;font-weight:700;font-size:.82rem;transition:background .15s}
+.up-join:hover{background:#E2D7FA}
+.up-join svg{width:14px;height:14px}
+.up-empty{padding:24px 18px;text-align:center;color:var(--ink-soft);font-size:.86rem;line-height:1.5}
 
 /* ============ MODAL ============ */
 .overlay{position:fixed;inset:0;z-index:60;background:rgba(70,52,63,.4);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -336,6 +360,7 @@ textarea.control{resize:vertical;min-height:64px}
         <span class="nav-badge pink" id="badgeRegs" data-count="0">0</span>
       </button>
     </nav>
+    <button id="syncStatus" class="sync" title="Status sinkronisasi data — klik untuk muat ulang"><span class="sync-dot"></span><span class="sync-tx">Lokal saja</span></button>
   </div>
 </header>
 
@@ -391,16 +416,19 @@ textarea.control{resize:vertical;min-height:64px}
         <button id="calNext" class="cal-arrow" aria-label="Bulan berikutnya"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
       </div>
       <button id="calToday" class="btn-soft">Hari ini</button>
+      <button id="calAddMeet" class="btn-add" style="padding:9px 15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Jadwal</button>
       <div class="cal-legend">
         <span class="legend-item"><span class="legend-dot" style="background:#F47A8F"></span>Lewat / mendesak</span>
         <span class="legend-item"><span class="legend-dot" style="background:#F6C268"></span>≤ 30 hari</span>
         <span class="legend-item"><span class="legend-dot" style="background:#9BD7BB"></span>Aman</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#EDE6FA;border:1px solid #9A7BD6"></span>Rapat / meeting</span>
       </div>
     </div>
     <div class="cal-grid">
       <div class="cal-week-head"><div>Sen</div><div>Sel</div><div>Rab</div><div>Kam</div><div>Jum</div><div>Sab</div><div>Min</div></div>
       <div class="cal-days" id="calDays"></div>
     </div>
+    <div class="upcoming" id="upcoming"></div>
   </section>
 
   <!-- REGS -->
@@ -489,8 +517,8 @@ textarea.control{resize:vertical;min-height:64px}
       <div class="field row2">
         <div>
           <label for="regKategori">Kategori / topik</label>
-          <input class="control" id="regKategori" list="katList" placeholder="mis. Limbah B3">
-          <datalist id="katList"><option>Persetujuan Lingkungan</option><option>AMDAL/UKL-UPL</option><option>PERTEK</option><option>Baku Mutu Air</option><option>Baku Mutu Udara</option><option>Limbah B3</option><option>Pengelolaan Sampah</option><option>Perizinan Berusaha</option><option>Kehutanan</option><option>Iklim &amp; Emisi</option></datalist>
+          <select class="control" id="regKategori"></select>
+          <input class="control" id="regKategoriLain" placeholder="Tulis kategori lain…" style="margin-top:8px;display:none">
         </div>
         <div><label for="regRelevansi">Relevansi</label><select class="control" id="regRelevansi"></select></div>
       </div>
@@ -501,6 +529,32 @@ textarea.control{resize:vertical;min-height:64px}
       <button class="btn-del" id="regDelete" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Hapus</button>
       <button class="btn-ghost" data-close="reg">Batal</button>
       <button class="btn-primary" id="regSave">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEETING MODAL -->
+<div class="overlay" id="meetOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="meetModalTitle">
+    <div class="modal-head">
+      <h2 id="meetModalTitle">Tambah jadwal</h2>
+      <button class="modal-x" data-close="meet" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="meetId">
+      <div class="field"><label for="meetJudul">Judul rapat / agenda <span class="req">*</span></label><input class="control" id="meetJudul" placeholder="mis. Rapat pembahasan draf ANDAL dengan klien"></div>
+      <div class="field row2">
+        <div><label for="meetTanggal">Tanggal <span class="req">*</span></label><input class="control" type="date" id="meetTanggal"></div>
+        <div><label for="meetMulai">Waktu (mulai – selesai)</label><div style="display:flex;gap:8px;align-items:center"><input class="control" type="time" id="meetMulai"><span style="color:var(--ink-soft)">–</span><input class="control" type="time" id="meetSelesai"></div></div>
+      </div>
+      <div class="field"><label for="meetLink">Tautan Zoom / Google Meet / Teams</label><input class="control" id="meetLink" placeholder="https://zoom.us/j/…"></div>
+      <div class="field"><label for="meetTerkait">Terkait proyek / klien</label><input class="control" id="meetTerkait" placeholder="mis. PT Sandang Jaya"></div>
+      <div class="field"><label for="meetCatatan">Catatan</label><textarea class="control" id="meetCatatan" placeholder="mis. Agenda: pembahasan dampak kualitas air…"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-del" id="meetDelete" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Hapus</button>
+      <button class="btn-ghost" data-close="meet">Batal</button>
+      <button class="btn-primary" id="meetSave">Simpan</button>
     </div>
   </div>
 </div>
@@ -524,6 +578,7 @@ const REG_STATUS_LIST=['Baru','Berlaku','Direvisi','Dicabut'];
 const REG_STATUS_CLS={'Baru':'s-pink','Berlaku':'s-sky','Direvisi':'s-sun','Dicabut':'s-grey'};
 const REL_LIST=['Tinggi','Sedang','Rendah'];
 const REL_CLS={'Tinggi':'s-coral','Sedang':'s-sun','Rendah':'s-grey'};
+const REG_KATEGORI=['Persetujuan Lingkungan','Perizinan Berusaha','AMDAL/UKL-UPL','PERTEK','Baku Mutu Air','Baku Mutu Udara','Limbah B3','Pengelolaan Sampah','Kehutanan','Iklim & Emisi','Lainnya'];
 
 const DOT_COLOR={'s-sky':'#7FB0E6','s-grape':'#A98FDB','s-sun':'#EBBE5E','s-coral':'#EE8585','s-leaf':'#7FCBA3','s-pink':'#EE8FB5','s-grey':'#C3B2BC'};
 const URG_COLOR={'u-over':{bg:'#FBE2E2',tx:'#B85656',bd:'#F47A8F'},'u-soon':{bg:'#FCF1D6',tx:'#9A7726',bd:'#F6C268'},'u-ok':{bg:'#DFF3E8',tx:'#3E8C66',bd:'#9BD7BB'},'u-far':{bg:'#EFF4F0',tx:'#5E7A6B',bd:'#C5D8C9'},'u-done':{bg:'#F0E8ED',tx:'#90798A',bd:'#DCD2D8'},'u-none':{bg:'#F0E8ED',tx:'#90798A',bd:'#DCD2D8'}};
@@ -542,7 +597,7 @@ const TAHAPAN_TEMPLATE={
 };
 
 /* ---------- State ---------- */
-const state={docs:[],regs:[],tab:'dashboard',docFilter:'Semua',regFilter:'Semua',docQuery:'',regQuery:'',calYear:0,calMonth:0};
+const state={docs:[],regs:[],meetings:[],tab:'dashboard',docFilter:'Semua',regFilter:'Semua',docQuery:'',regQuery:'',calYear:0,calMonth:0};
 let editTahapan=[],modalManualProgress=0,lastFocus=null;
 
 /* ---------- Icons ---------- */
@@ -552,7 +607,8 @@ const IC={
   edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>',
   folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>',
   book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>',
-  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 2 2 4-4"/><path d="M9 5h11M5 5h.01"/></svg>'
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 2 2 4-4"/><path d="M9 5h11M5 5h.01"/></svg>',
+  video:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>'
 };
 
 /* ---------- Helpers ---------- */
@@ -591,9 +647,61 @@ async function sset(k,v){
   if(hasStore()){try{await window.storage.set(k,v,false);return;}catch(e){}}
   try{localStorage.setItem(k,v);}catch(e){}
 }
-async function persist(){await sset('ekolacak:docs',JSON.stringify(state.docs));await sset('ekolacak:regs',JSON.stringify(state.regs));}
+/* ---------- Cloud sync (Supabase) ---------- */
+/* URL sudah diisi. TEMPEL Publishable key Anda (sb_publishable_...) di antara kutip pada baris "key". */
+const CLOUD={
+  url:'https://tljemdtvihrtaoxsjock.supabase.co',
+  key:'sb_publishable_BH3CHkW5Kx5M_HfYb15_Rw_U7qewgct'
+};
+function cloudOn(){return !!(CLOUD.url&&CLOUD.key);}
+function cloudHead(extra){const h=Object.assign({apikey:CLOUD.key},extra||{});if(/^eyJ/.test(CLOUD.key))h.Authorization='Bearer '+CLOUD.key;return h;}
+function snapshot(){return {docs:state.docs,regs:state.regs,meetings:state.meetings};}
+function applySnapshot(s){
+  state.docs=(s&&Array.isArray(s.docs)?s.docs:[]).map(normDoc);
+  state.regs=(s&&Array.isArray(s.regs)?s.regs:[]);
+  state.meetings=(s&&Array.isArray(s.meetings)?s.meetings:[]).map(normMeeting);
+}
+function localSave(){try{localStorage.setItem('aca:bundle',JSON.stringify(snapshot()));}catch(e){}}
+function localLoad(){try{const v=localStorage.getItem('aca:bundle');return v?JSON.parse(v):null;}catch(e){return null;}}
+async function cloudPull(){
+  if(!cloudOn())return null;
+  try{
+    const r=await fetch(CLOUD.url+'/rest/v1/appdata?id=eq.main&select=data',{headers:cloudHead()});
+    if(!r.ok)return null;
+    const j=await r.json();
+    if(j&&j.length&&j[0].data)return j[0].data;
+    return 'empty';
+  }catch(e){return null;}
+}
+async function cloudPush(){
+  if(!cloudOn())return false;
+  try{
+    const r=await fetch(CLOUD.url+'/rest/v1/appdata?on_conflict=id',{method:'POST',headers:cloudHead({'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify([{id:'main',data:snapshot(),updated_at:new Date().toISOString()}])});
+    return r.ok;
+  }catch(e){return false;}
+}
+function setSync(s){
+  const el=document.getElementById('syncStatus');if(!el)return;
+  const map={off:['#90798A','Lokal saja'],loading:['#3E6FA3','Memuat…'],saving:['#9A7726','Menyimpan…'],saved:['#3E8C66','Tersinkron'],offline:['#B85656','Gagal sambung']};
+  const v=map[s]||map.off;el.style.setProperty('--sc',v[0]);el.querySelector('.sync-tx').textContent=v[1];
+  el.classList.toggle('clickable',cloudOn());
+}
+let pushT;
+function persist(){
+  localSave();
+  if(cloudOn()){setSync('saving');clearTimeout(pushT);pushT=setTimeout(async()=>{const ok=await cloudPush();setSync(ok?'saved':'offline');},500);}
+}
+async function syncNow(){
+  if(!cloudOn()){toast('Sinkronisasi belum diatur');return;}
+  setSync('loading');
+  const c=await cloudPull();
+  if(c==='empty'){const ok=await cloudPush();setSync(ok?'saved':'offline');return;}
+  if(c){applySnapshot(c);localSave();renderAll();setSync('saved');toast('Data terbaru dimuat dari cloud');return;}
+  setSync('offline');toast('Gagal menyambung ke cloud');
+}
 
 function normDoc(d){return Object.assign({klien:'',jenis:'Lainnya',status:'Penyusunan',mulai:'',deadline:'',progress:0,pic:'',catatan:''},d,{tahapan:Array.isArray(d.tahapan)?d.tahapan:[],history:Array.isArray(d.history)?d.history:[]});}
+function normMeeting(m){return Object.assign({judul:'',tanggal:'',waktuMulai:'',waktuSelesai:'',link:'',terkait:'',catatan:''},m);}
 
 function seedSample(){
   state.regs=[
@@ -612,20 +720,40 @@ function seedSample(){
     normDoc({id:uid(),nama:'SPPL Bengkel Kendaraan Bermotor',klien:'CV Mitra Otomotif',jenis:'SPPL',status:'Selesai',mulai:offsetDate(-40),deadline:offsetDate(-10),pic:'Dewi',tahapan:mkTahapan('SPPL',3),catatan:'NIB dan SPPL sudah terbit.',history:[{ts:offsetDateTime(40),to:'Penyusunan',note:'Dibuat'},{ts:offsetDateTime(11),from:'Pengajuan ke Instansi',to:'Selesai'}]}),
     normDoc({id:uid(),nama:'UKL-UPL Perumahan Subsidi',klien:'PT Karya Griya Persada',jenis:'UKL-UPL',status:'Penyusunan',mulai:offsetDate(-10),deadline:offsetDate(58),pic:'Dewi',tahapan:mkTahapan('UKL-UPL',1),catatan:'',history:[{ts:offsetDateTime(10),to:'Penyusunan',note:'Dibuat'}]})
   ];
+  state.meetings=[
+    normMeeting({id:uid(),judul:'Koordinasi internal mingguan',tanggal:offsetDate(1),waktuMulai:'15:00',waktuSelesai:'15:30',link:'https://meet.google.com/abc-defg-hij',terkait:'',catatan:'Bahas progres semua proyek aktif.'}),
+    normMeeting({id:uid(),judul:'Rapat pembahasan draf ANDAL dengan klien',tanggal:offsetDate(2),waktuMulai:'10:00',waktuSelesai:'11:30',link:'https://zoom.us/j/0000000000',terkait:'PT Sandang Jaya Nusantara',catatan:'Bahas dampak kualitas udara dan rencana pengelolaan.'}),
+    normMeeting({id:uid(),judul:'Sidang KPA Adendum AMDAL',tanggal:offsetDate(6),waktuMulai:'09:00',waktuSelesai:'',link:'',terkait:'PT Bumi Mineral Sejahtera',catatan:'Siapkan paparan dan dokumen pendukung.'})
+  ];
 }
 
 async function loadData(){
-  const seededRec=await sget('ekolacak:seeded');
-  if(seededRec&&seededRec.value){
-    const d=await sget('ekolacak:docs'),r=await sget('ekolacak:regs');
-    try{state.regs=r?JSON.parse(r.value):[];}catch(e){state.regs=[];}
-    try{state.docs=(d?JSON.parse(d.value):[]).map(normDoc);}catch(e){state.docs=[];}
-    const bn=await sget('ekolacak:bannerHidden');if(bn&&bn.value==='1'){const b=document.getElementById('banner');if(b)b.remove();}
-  }else{
-    seedSample();
-    await sset('ekolacak:seeded','3');
-    await persist();
+  const bn=await sget('ekolacak:bannerHidden');if(bn&&bn.value==='1'){const b=document.getElementById('banner');if(b)b.remove();}
+  if(cloudOn()){
+    setSync('loading');
+    const c=await cloudPull();
+    if(c==='empty'){
+      const lb=localLoad();if(lb){applySnapshot(lb);}else{const lg=await legacyLoad();if(lg){applySnapshot(lg);}else{seedSample();}}
+      localSave();const ok=await cloudPush();setSync(ok?'saved':'offline');return;
+    }
+    if(c){applySnapshot(c);localSave();setSync('saved');return;}
+    setSync('offline');
+    const lb=localLoad();if(lb){applySnapshot(lb);return;}
+    const lg=await legacyLoad();if(lg){applySnapshot(lg);localSave();return;}
+    seedSample();localSave();return;
   }
+  setSync('off');
+  const lb=localLoad();if(lb){applySnapshot(lb);return;}
+  const lg=await legacyLoad();if(lg){applySnapshot(lg);localSave();return;}
+  seedSample();localSave();
+}
+async function legacyLoad(){
+  try{
+    const seededRec=await sget('ekolacak:seeded');
+    if(!(seededRec&&seededRec.value))return null;
+    const d=await sget('ekolacak:docs'),r=await sget('ekolacak:regs'),mt=await sget('ekolacak:meetings');
+    return {docs:d?JSON.parse(d.value):[],regs:r?JSON.parse(r.value):[],meetings:mt?JSON.parse(mt.value):[]};
+  }catch(e){return null;}
 }
 
 /* ---------- Toast ---------- */
@@ -721,20 +849,43 @@ function renderCalendar(){
   const y=state.calYear,m=state.calMonth;
   document.getElementById('calMonth').textContent=MONTH_FULL[m]+' '+y;
   const ev={};
-  state.docs.forEach(d=>{if(d.deadline){(ev[d.deadline]=ev[d.deadline]||[]).push({id:d.id,name:d.nama,u:urgency(d)});}});
+  const push=(ds,it)=>{(ev[ds]=ev[ds]||[]).push(it);};
+  state.docs.forEach(d=>{if(d.deadline)push(d.deadline,{kind:'deadline',id:d.id,name:d.nama,u:urgency(d),sort:'99:99'});});
+  state.meetings.forEach(mt=>{if(mt.tanggal)push(mt.tanggal,{kind:'meet',id:mt.id,name:mt.judul,time:mt.waktuMulai||'',sort:mt.waktuMulai||'00:00'});});
   const first=new Date(y,m,1);
   const start=new Date(y,m,1-((first.getDay()+6)%7));
   const todayStr=localISO(new Date());
   let html='';
   for(let i=0;i<42;i++){
     const dt=new Date(start);dt.setDate(start.getDate()+i);
-    const ds=localISO(dt),other=dt.getMonth()!==m,today=ds===todayStr,list=ev[ds]||[];
+    const ds=localISO(dt),other=dt.getMonth()!==m,today=ds===todayStr;
+    const list=(ev[ds]||[]).slice().sort((a,b)=>a.sort.localeCompare(b.sort));
     let chips='';
-    list.slice(0,3).forEach(e=>{const c=URG_COLOR[e.u.cls]||URG_COLOR['u-far'];chips+='<div class="cal-event" data-doc="'+e.id+'" title="'+esc(e.name)+' — '+e.u.label+'" style="--ev:'+c.bd+';background:'+c.bg+';color:'+c.tx+'">'+esc(e.name)+'</div>';});
+    list.slice(0,3).forEach(it=>{
+      if(it.kind==='deadline'){const c=URG_COLOR[it.u.cls]||URG_COLOR['u-far'];chips+='<div class="cal-event" data-doc="'+it.id+'" title="'+esc(it.name)+' — '+it.u.label+'" style="--ev:'+c.bd+';background:'+c.bg+';color:'+c.tx+'">'+esc(it.name)+'</div>';}
+      else{chips+='<div class="cal-event cal-meet" data-meet="'+it.id+'" title="'+esc(it.name)+(it.time?(' · '+it.time):'')+'">'+(it.time?esc(it.time)+' ':'')+esc(it.name)+'</div>';}
+    });
     if(list.length>3)chips+='<div class="cal-more">+'+(list.length-3)+' lagi</div>';
-    html+='<div class="cal-day'+(other?' other':'')+(today?' today':'')+'"><span class="cal-daynum">'+dt.getDate()+'</span>'+chips+'</div>';
+    html+='<div class="cal-day'+(other?' other':'')+(today?' today':'')+'" data-date="'+ds+'"><span class="cal-daynum">'+dt.getDate()+'</span>'+chips+'</div>';
   }
   document.getElementById('calDays').innerHTML=html;
+  renderUpcoming();
+}
+function renderUpcoming(){
+  const box=document.getElementById('upcoming');
+  const todayStr=localISO(new Date());
+  const up=state.meetings.filter(m=>m.tanggal&&m.tanggal>=todayStr).sort((a,b)=>(a.tanggal+(a.waktuMulai||'')).localeCompare(b.tanggal+(b.waktuMulai||''))).slice(0,8);
+  let inner='<div class="up-head"><span class="panel-dot"></span>Jadwal mendatang</div>';
+  if(!up.length){inner+='<div class="up-empty">Belum ada jadwal mendatang.<br>Klik tanggal di kalender atau tombol "+ Jadwal" untuk menambah rapat / meeting.</div>';}
+  else{
+    inner+='<div class="up-list">'+up.map(m=>{
+      const d=new Date(m.tanggal+'T00:00:00');
+      const time=m.waktuMulai?(m.waktuMulai+(m.waktuSelesai?('–'+m.waktuSelesai):'')):'';
+      const sub=[time,m.terkait].filter(Boolean).join(' · ')||'Tanpa waktu';
+      return '<div class="up-row" data-meet="'+m.id+'"><div class="up-date"><span class="up-d">'+d.getDate()+'</span><span class="up-m">'+BULAN[d.getMonth()]+'</span></div><div class="up-body"><div class="up-title">'+esc(m.judul)+'</div><div class="up-sub">'+esc(sub)+'</div></div>'+(m.link?'<a class="up-join" href="'+esc(m.link)+'" target="_blank" rel="noopener">'+IC.video+'Gabung</a>':'')+'</div>';
+    }).join('')+'</div>';
+  }
+  box.innerHTML=inner;
 }
 
 /* ---------- Badges & render ---------- */
@@ -846,7 +997,8 @@ function openRegModal(id){
   document.getElementById('regJudul').value=r?(r.judul||''):'';
   document.getElementById('regStatus').value=r?(r.status||'Baru'):'Baru';
   document.getElementById('regTanggal').value=r?(r.tanggal||''):offsetDate(0);
-  document.getElementById('regKategori').value=r?(r.kategori||''):'';
+  const kat=r?(r.kategori||''):'',katSel=document.getElementById('regKategori'),katLain=document.getElementById('regKategoriLain');
+  if(kat&&REG_KATEGORI.indexOf(kat)===-1){katSel.value='Lainnya';katLain.style.display='block';katLain.value=kat;}else{katSel.value=kat||REG_KATEGORI[0];katLain.style.display='none';katLain.value='';}
   document.getElementById('regRelevansi').value=r?(r.relevansi||REL_LIST[1]):REL_LIST[1];
   document.getElementById('regSumber').value=r?(r.sumber||''):'';
   document.getElementById('regCatatan').value=r?(r.catatan||''):'';
@@ -857,7 +1009,7 @@ function saveReg(){
   const nomor=document.getElementById('regNomor').value.trim();
   if(!nomor){const f=document.getElementById('regNomor');f.focus();f.style.borderColor='var(--coral)';return;}
   const id=document.getElementById('regId').value;
-  const data={nomor,jenis:document.getElementById('regJenis').value,judul:document.getElementById('regJudul').value.trim(),status:document.getElementById('regStatus').value,tanggal:document.getElementById('regTanggal').value,kategori:document.getElementById('regKategori').value.trim(),relevansi:document.getElementById('regRelevansi').value,sumber:document.getElementById('regSumber').value.trim(),catatan:document.getElementById('regCatatan').value.trim()};
+  const data={nomor,jenis:document.getElementById('regJenis').value,judul:document.getElementById('regJudul').value.trim(),status:document.getElementById('regStatus').value,tanggal:document.getElementById('regTanggal').value,kategori:(document.getElementById('regKategori').value==='Lainnya'?document.getElementById('regKategoriLain').value.trim():document.getElementById('regKategori').value),relevansi:document.getElementById('regRelevansi').value,sumber:document.getElementById('regSumber').value.trim(),catatan:document.getElementById('regCatatan').value.trim()};
   if(id){const i=state.regs.findIndex(x=>x.id===id);state.regs[i]=Object.assign({},state.regs[i],data);toast('Regulasi diperbarui');}
   else{state.regs.push(Object.assign({id:uid()},data));toast('Regulasi ditambahkan');}
   persist();closeOverlay(regOverlay);renderAll();
@@ -869,6 +1021,41 @@ function deleteReg(){
   persist();closeOverlay(regOverlay);renderAll();
 }
 
+/* ---------- Meeting Modal ---------- */
+const meetOverlay=document.getElementById('meetOverlay');
+function openMeetingModal(id,presetDate){
+  lastFocus=document.activeElement;
+  const m=id?state.meetings.find(x=>x.id===id):null;
+  document.getElementById('meetModalTitle').textContent=m?'Edit jadwal':'Tambah jadwal';
+  document.getElementById('meetId').value=m?m.id:'';
+  document.getElementById('meetJudul').value=m?(m.judul||''):'';
+  document.getElementById('meetTanggal').value=m?(m.tanggal||''):(presetDate||offsetDate(0));
+  document.getElementById('meetMulai').value=m?(m.waktuMulai||''):'';
+  document.getElementById('meetSelesai').value=m?(m.waktuSelesai||''):'';
+  document.getElementById('meetLink').value=m?(m.link||''):'';
+  document.getElementById('meetTerkait').value=m?(m.terkait||''):'';
+  document.getElementById('meetCatatan').value=m?(m.catatan||''):'';
+  document.getElementById('meetDelete').hidden=!m;
+  openOverlay(meetOverlay,'meetJudul');
+}
+function saveMeeting(){
+  const judul=document.getElementById('meetJudul').value.trim();
+  const tanggal=document.getElementById('meetTanggal').value;
+  if(!judul){const f=document.getElementById('meetJudul');f.focus();f.style.borderColor='var(--coral)';return;}
+  if(!tanggal){const f=document.getElementById('meetTanggal');f.focus();f.style.borderColor='var(--coral)';return;}
+  const id=document.getElementById('meetId').value;
+  const data={judul,tanggal,waktuMulai:document.getElementById('meetMulai').value,waktuSelesai:document.getElementById('meetSelesai').value,link:document.getElementById('meetLink').value.trim(),terkait:document.getElementById('meetTerkait').value.trim(),catatan:document.getElementById('meetCatatan').value.trim()};
+  if(id){const i=state.meetings.findIndex(x=>x.id===id);state.meetings[i]=normMeeting(Object.assign({},state.meetings[i],data));toast('Jadwal diperbarui');}
+  else{state.meetings.push(normMeeting(Object.assign({id:uid()},data)));toast('Jadwal ditambahkan');}
+  persist();closeOverlay(meetOverlay);renderAll();
+}
+function deleteMeeting(){
+  const id=document.getElementById('meetId').value;if(!id)return;
+  if(!confirm('Hapus jadwal ini?'))return;
+  state.meetings=state.meetings.filter(x=>x.id!==id);toast('Jadwal dihapus');
+  persist();closeOverlay(meetOverlay);renderAll();
+}
+
 /* ---------- Overlay utils ---------- */
 function openOverlay(ov,focusId){ov.classList.add('open');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>{const f=document.getElementById(focusId);if(f){f.focus();f.style.borderColor='';}},60);}
 function closeOverlay(ov){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';if(lastFocus&&lastFocus.focus)lastFocus.focus();}
@@ -876,6 +1063,7 @@ function closeOverlay(ov){ov.classList.remove('open');ov.setAttribute('aria-hidd
 /* ---------- Events ---------- */
 function bind(){
   document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+  document.getElementById('syncStatus').addEventListener('click',syncNow);
   document.getElementById('addDoc').addEventListener('click',()=>openDocModal(null));
   document.getElementById('addReg').addEventListener('click',()=>openRegModal(null));
   document.getElementById('docSave').addEventListener('click',saveDoc);
@@ -896,9 +1084,10 @@ function bind(){
   document.getElementById('docTahapanList').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(b){editTahapan.splice(+b.dataset.del,1);renderTahapan();}});
 
   // close
-  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeOverlay(b.dataset.close==='doc'?docOverlay:regOverlay)));
-  [docOverlay,regOverlay].forEach(ov=>ov.addEventListener('mousedown',e=>{if(e.target===ov)closeOverlay(ov);}));
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(docOverlay.classList.contains('open'))closeOverlay(docOverlay);if(regOverlay.classList.contains('open'))closeOverlay(regOverlay);}});
+  const OVMAP={doc:docOverlay,reg:regOverlay,meet:meetOverlay};
+  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeOverlay(OVMAP[b.dataset.close])));
+  [docOverlay,regOverlay,meetOverlay].forEach(ov=>ov.addEventListener('mousedown',e=>{if(e.target===ov)closeOverlay(ov);}));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){[docOverlay,regOverlay,meetOverlay].forEach(ov=>{if(ov.classList.contains('open'))closeOverlay(ov);});}});
 
   // lists
   document.getElementById('listDocs').addEventListener('click',e=>{if(e.target.closest('a'))return;const c=e.target.closest('.card');if(c)openDocModal(c.dataset.id);});
@@ -922,7 +1111,16 @@ function bind(){
   document.getElementById('calPrev').addEventListener('click',()=>{state.calMonth--;if(state.calMonth<0){state.calMonth=11;state.calYear--;}renderCalendar();});
   document.getElementById('calNext').addEventListener('click',()=>{state.calMonth++;if(state.calMonth>11){state.calMonth=0;state.calYear++;}renderCalendar();});
   document.getElementById('calToday').addEventListener('click',()=>{const n=new Date();state.calYear=n.getFullYear();state.calMonth=n.getMonth();renderCalendar();});
-  document.getElementById('calDays').addEventListener('click',e=>{const ev=e.target.closest('[data-doc]');if(ev)openDocModal(ev.dataset.doc);});
+  document.getElementById('calAddMeet').addEventListener('click',()=>openMeetingModal(null));
+  document.getElementById('meetSave').addEventListener('click',saveMeeting);
+  document.getElementById('meetDelete').addEventListener('click',deleteMeeting);
+  document.getElementById('calDays').addEventListener('click',e=>{
+    const dEv=e.target.closest('[data-doc]');if(dEv){openDocModal(dEv.dataset.doc);return;}
+    const mEv=e.target.closest('[data-meet]');if(mEv){openMeetingModal(mEv.dataset.meet);return;}
+    const day=e.target.closest('.cal-day');if(day&&day.dataset.date&&!day.classList.contains('other'))openMeetingModal(null,day.dataset.date);
+  });
+  document.getElementById('upcoming').addEventListener('click',e=>{if(e.target.closest('a'))return;const row=e.target.closest('[data-meet]');if(row)openMeetingModal(row.dataset.meet);});
+  document.getElementById('regKategori').addEventListener('change',e=>{const lain=document.getElementById('regKategoriLain');if(e.target.value==='Lainnya'){lain.style.display='block';lain.focus();}else{lain.style.display='none';}});
 
   // banner
   const bx=document.getElementById('bannerX');
@@ -936,6 +1134,7 @@ function bind(){
   fillSelect(document.getElementById('regJenis'),REG_JENIS);
   fillSelect(document.getElementById('regStatus'),REG_STATUS_LIST);
   fillSelect(document.getElementById('regRelevansi'),REL_LIST);
+  fillSelect(document.getElementById('regKategori'),REG_KATEGORI);
   const n=new Date();state.calYear=n.getFullYear();state.calMonth=n.getMonth();
   bind();
   await loadData();
