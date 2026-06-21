@@ -873,16 +873,17 @@ function docCard(d){
 }
 
 /* ---------- Regs ---------- */
-const REG_TOPIK=['Semua','Air','Udara','Limbah B3','Lainnya'];
+const REG_TOPIK=['Semua','Air','Udara','Limbah B3','Sampah','Lainnya'];
 function regTopik(r){
   const s=((r.kategori||'')+' '+(r.judul||'')).toLowerCase();
   if(s.includes('udara')) return 'Udara';
   if(s.includes('b3')) return 'Limbah B3';
+  if(s.includes('sampah')) return 'Sampah';
   if(s.includes('air')) return 'Air';
   return 'Lainnya';
 }
 function renderRegs(){
-  const counts={'Semua':state.regs.length,'Air':0,'Udara':0,'Limbah B3':0,'Lainnya':0};
+  const counts={'Semua':state.regs.length,'Air':0,'Udara':0,'Limbah B3':0,'Sampah':0,'Lainnya':0};
   state.regs.forEach(r=>{counts[regTopik(r)]++;});
   document.getElementById('chipsRegs').innerHTML=REG_TOPIK.map(f=>'<button class="chip'+(state.regFilter===f?' active':'')+'" data-regfilter="'+esc(f)+'">'+esc(f)+' <span class="c-num">'+(counts[f]||0)+'</span></button>').join('');
   const q=state.regQuery.toLowerCase();
