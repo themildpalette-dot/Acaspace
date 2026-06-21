@@ -77,6 +77,24 @@ a{color:inherit;text-decoration:none}
 .nav-badge{min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--coral);color:#fff;font-size:.68rem;font-weight:700;display:inline-grid;place-items:center;line-height:1}
 .nav-badge.pink{background:var(--pink-deep)}
 .nav-badge[data-count="0"]{display:none}
+.todo-card{margin-bottom:26px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px}
+.todo-head{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.todo-head h2{font-size:1.02rem;font-weight:700}
+.todo-count{margin-left:auto;font-size:.78rem;color:var(--ink-soft);font-weight:600}
+.todo-add{display:flex;gap:9px}
+.todo-add input{flex:1;padding:10px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface);transition:border-color .15s,box-shadow .15s}
+.todo-add input::placeholder{color:var(--ink-soft)}
+.todo-add input:focus{outline:none;border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(231,108,156,.18)}
+.todo-list{display:flex;flex-direction:column;margin-top:6px}
+.todo-item{display:flex;align-items:center;gap:11px;padding:10px 6px;border-radius:9px;transition:background .12s;border-bottom:1px solid var(--line);cursor:pointer}
+.todo-item:last-child{border-bottom:none}
+.todo-item:hover{background:var(--surface-2)}
+.todo-item input{width:18px;height:18px;accent-color:var(--mint-deep);flex:none;cursor:pointer}
+.todo-text{flex:1;font-size:.92rem}
+.todo-text.done{text-decoration:line-through;color:var(--ink-soft)}
+.todo-del{color:var(--ink-soft);font-size:1.3rem;line-height:1;padding:0 7px;border-radius:6px}
+.todo-del:hover{color:var(--coral);background:#FBE2E2}
+.todo-empty{padding:14px 6px;color:var(--ink-soft);font-size:.86rem}
 .backup{margin-top:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px}
 .backup-info{flex:1;min-width:200px}
 .backup-info strong{display:block;font-weight:700;font-size:.95rem}
@@ -384,6 +402,14 @@ textarea.control{resize:vertical;min-height:64px}
       <button class="banner-x" id="bannerX" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="stats" id="stats"></div>
+    <div class="todo-card">
+      <div class="todo-head"><span class="panel-dot" style="background:var(--mint-deep)"></span><h2>Tugas hari ini</h2><span class="todo-count" id="todoCount"></span></div>
+      <div class="todo-add">
+        <input id="todoInput" placeholder="Tambah tugas… (mis. Kirim draf UKL-UPL ke klien)">
+        <button id="todoAdd" class="btn-add" style="padding:10px 16px">Tambah</button>
+      </div>
+      <div class="todo-list" id="todoList"></div>
+    </div>
     <div class="panels">
       <div class="panel">
         <div class="panel-head"><span class="panel-dot" style="background:#F47A8F"></span><h2>Deadline terdekat</h2><span class="count" id="cntDeadline"></span></div>
@@ -613,7 +639,7 @@ const TAHAPAN_TEMPLATE={
 };
 
 /* ---------- State ---------- */
-const state={docs:[],regs:[],meetings:[],tab:'dashboard',docFilter:'Semua',regFilter:'Semua',docQuery:'',regQuery:'',calYear:0,calMonth:0};
+const state={docs:[],regs:[],meetings:[],todos:[],tab:'dashboard',docFilter:'Semua',regFilter:'Semua',docQuery:'',regQuery:'',calYear:0,calMonth:0};
 let editTahapan=[],modalManualProgress=0,lastFocus=null;
 
 /* ---------- Icons ---------- */
@@ -671,11 +697,12 @@ const CLOUD={
 };
 function cloudOn(){return !!(CLOUD.url&&CLOUD.key);}
 function cloudHead(extra){const h=Object.assign({apikey:CLOUD.key},extra||{});if(/^eyJ/.test(CLOUD.key))h.Authorization='Bearer '+CLOUD.key;return h;}
-function snapshot(){return {docs:state.docs,regs:state.regs,meetings:state.meetings};}
+function snapshot(){return {docs:state.docs,regs:state.regs,meetings:state.meetings,todos:state.todos};}
 function applySnapshot(s){
   state.docs=(s&&Array.isArray(s.docs)?s.docs:[]).map(normDoc);
   state.regs=(s&&Array.isArray(s.regs)?s.regs:[]);
   state.meetings=(s&&Array.isArray(s.meetings)?s.meetings:[]).map(normMeeting);
+  state.todos=(s&&Array.isArray(s.todos)?s.todos:[]);
 }
 function localSave(){try{localStorage.setItem('aca:bundle',JSON.stringify(snapshot()));}catch(e){}}
 function localLoad(){try{const v=localStorage.getItem('aca:bundle');return v?JSON.parse(v):null;}catch(e){return null;}}
@@ -802,8 +829,21 @@ function renderDashboard(){
     const c=REG_STATUS_CLS[r.status]||'s-grey';
     return '<div class="mini" data-openreg="'+r.id+'" style="--spine:'+(REG_JENIS_COLOR[r.jenis]||'#C3B2BC')+'"><div class="mini-body"><div class="mini-title">'+esc(r.nomor)+'</div><div class="mini-meta">'+esc(r.judul||'—')+'</div></div><div class="mini-right"><span class="pill '+c+'">'+esc(r.status)+'</span></div></div>';
   }).join(''):'<div class="panel-empty">Belum ada regulasi yang ditandai.</div>';
+  renderTodos();
 }
 function statCard(cls,ic,num,label){return '<div class="stat '+cls+'"><div class="stat-ic">'+ic+'</div><div class="stat-num">'+num+'</div><div class="stat-label">'+label+'</div></div>';}
+function renderTodos(){
+  const list=document.getElementById('todoList');if(!list)return;
+  const t=state.todos||[];
+  const left=t.filter(x=>!x.done).length;
+  document.getElementById('todoCount').textContent=t.length?(left+' belum selesai'):'';
+  if(!t.length){list.innerHTML='<div class="todo-empty">Belum ada tugas. Tambahkan apa yang ingin Anda kerjakan hari ini.</div>';return;}
+  const sorted=t.slice().sort((a,b)=>(a.done?1:0)-(b.done?1:0));
+  list.innerHTML=sorted.map(x=>'<label class="todo-item"><input type="checkbox" data-id="'+x.id+'"'+(x.done?' checked':'')+'><span class="todo-text'+(x.done?' done':'')+'">'+esc(x.text)+'</span><button type="button" class="todo-del" data-del="'+x.id+'" aria-label="Hapus tugas">&times;</button></label>').join('');
+}
+function addTodo(){const inp=document.getElementById('todoInput');const v=inp.value.trim();if(!v)return;state.todos.push({id:uid(),text:v,done:false});inp.value='';persist();renderTodos();inp.focus();}
+function toggleTodo(id,done){const x=state.todos.find(t=>t.id===id);if(x){x.done=done;persist();renderTodos();}}
+function deleteTodo(id){state.todos=state.todos.filter(t=>t.id!==id);persist();renderTodos();}
 
 /* ---------- Docs ---------- */
 function renderDocs(){
@@ -833,12 +873,20 @@ function docCard(d){
 }
 
 /* ---------- Regs ---------- */
+const REG_TOPIK=['Semua','Air','Udara','Limbah B3','Lainnya'];
+function regTopik(r){
+  const s=((r.kategori||'')+' '+(r.judul||'')).toLowerCase();
+  if(s.includes('udara')) return 'Udara';
+  if(s.includes('b3')) return 'Limbah B3';
+  if(s.includes('air')) return 'Air';
+  return 'Lainnya';
+}
 function renderRegs(){
-  const counts={'Semua':state.regs.length};
-  REG_STATUS_LIST.forEach(s=>counts[s]=state.regs.filter(r=>r.status===s).length);
-  document.getElementById('chipsRegs').innerHTML=['Semua',...REG_STATUS_LIST].map(f=>'<button class="chip'+(state.regFilter===f?' active':'')+'" data-regfilter="'+esc(f)+'">'+esc(f)+' <span class="c-num">'+(counts[f]||0)+'</span></button>').join('');
+  const counts={'Semua':state.regs.length,'Air':0,'Udara':0,'Limbah B3':0,'Lainnya':0};
+  state.regs.forEach(r=>{counts[regTopik(r)]++;});
+  document.getElementById('chipsRegs').innerHTML=REG_TOPIK.map(f=>'<button class="chip'+(state.regFilter===f?' active':'')+'" data-regfilter="'+esc(f)+'">'+esc(f)+' <span class="c-num">'+(counts[f]||0)+'</span></button>').join('');
   const q=state.regQuery.toLowerCase();
-  let list=state.regs.filter(r=>state.regFilter==='Semua'||r.status===state.regFilter);
+  let list=state.regs.filter(r=>state.regFilter==='Semua'||regTopik(r)===state.regFilter);
   if(q)list=list.filter(r=>((r.nomor||'')+(r.judul||'')+(r.kategori||'')+(r.jenis||'')).toLowerCase().includes(q));
   list.sort((a,b)=>new Date(b.tanggal||0)-new Date(a.tanggal||0));
   const el=document.getElementById('listRegs');
@@ -1220,6 +1268,10 @@ function bind(){
   document.getElementById('btnExport').addEventListener('click',exportData);
   document.getElementById('btnImport').addEventListener('click',()=>document.getElementById('importFile').click());
   document.getElementById('importFile').addEventListener('change',e=>{const f=e.target.files[0];if(f)importData(f);e.target.value='';});
+  document.getElementById('todoAdd').addEventListener('click',addTodo);
+  document.getElementById('todoInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addTodo();}});
+  document.getElementById('todoList').addEventListener('change',e=>{const cb=e.target.closest('input[type=checkbox]');if(cb)toggleTodo(cb.dataset.id,cb.checked);});
+  document.getElementById('todoList').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(b){e.preventDefault();deleteTodo(b.dataset.del);}});
   document.getElementById('regKategori').addEventListener('change',e=>{const lain=document.getElementById('regKategoriLain');if(e.target.value==='Lainnya'){lain.style.display='block';lain.focus();}else{lain.style.display='none';}});
 
   // banner
