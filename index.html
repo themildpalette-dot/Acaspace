@@ -7,6 +7,9 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Aca Space — Pelacak Dokumen & Regulasi Lingkungan</title>
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<meta name="apple-mobile-web-app-title" content="Aca Space">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -74,6 +77,11 @@ a{color:inherit;text-decoration:none}
 .nav-badge{min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--coral);color:#fff;font-size:.68rem;font-weight:700;display:inline-grid;place-items:center;line-height:1}
 .nav-badge.pink{background:var(--pink-deep)}
 .nav-badge[data-count="0"]{display:none}
+.backup{margin-top:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px}
+.backup-info{flex:1;min-width:200px}
+.backup-info strong{display:block;font-weight:700;font-size:.95rem}
+.backup-info span{font-size:.82rem;color:var(--ink-soft)}
+.backup-actions{display:flex;gap:10px;flex-wrap:wrap}
 .sync{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:10px;font-size:.78rem;font-weight:700;color:var(--ink-soft);background:var(--surface-2);white-space:nowrap;flex:0 0 auto}
 .sync .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--sc,#90798A);transition:background .2s}
 .sync.clickable{cursor:pointer}
@@ -337,7 +345,6 @@ textarea.control{resize:vertical;min-height:64px}
       </div>
       <div>
         <div class="brand-name">Aca Space</div>
-        <div class="brand-sub">Pelacak dokumen &amp; regulasi lingkungan</div>
       </div>
     </div>
     <nav class="nav" role="tablist">
@@ -387,6 +394,14 @@ textarea.control{resize:vertical;min-height:64px}
         <div class="panel-list" id="panelRegs"></div>
       </div>
     </div>
+    <div class="backup">
+      <div class="backup-info"><strong>Cadangan data</strong><span>Unduh semua data sebagai file, atau pulihkan dari file cadangan.</span></div>
+      <div class="backup-actions">
+        <button id="btnExport" class="btn-soft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-3px;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Ekspor data</button>
+        <button id="btnImport" class="btn-soft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-3px;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 8 5-5 5 5"/><path d="M12 3v12"/></svg>Impor data</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+    </div>
   </section>
 
   <!-- DOCS -->
@@ -417,6 +432,7 @@ textarea.control{resize:vertical;min-height:64px}
       </div>
       <button id="calToday" class="btn-soft">Hari ini</button>
       <button id="calAddMeet" class="btn-add" style="padding:9px 15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Jadwal</button>
+      <button id="calExport" class="btn-soft" title="Unduh semua deadline & jadwal sebagai file kalender (.ics)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;vertical-align:-2px;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Ekspor kalender</button>
       <div class="cal-legend">
         <span class="legend-item"><span class="legend-dot" style="background:#F47A8F"></span>Lewat / mendesak</span>
         <span class="legend-item"><span class="legend-dot" style="background:#F6C268"></span>≤ 30 hari</span>
@@ -764,12 +780,12 @@ function toast(msg){const t=document.getElementById('toast');document.getElement
 function renderDashboard(){
   const aktif=state.docs.filter(d=>d.status!=='Selesai').length;
   const mendesak=state.docs.filter(isUrgent).length;
-  const baru=state.regs.filter(r=>r.status==='Baru').length;
+  const totalReg=state.regs.length;
   const selesai=state.docs.filter(d=>d.status==='Selesai').length;
   document.getElementById('stats').innerHTML=[
     statCard('mint',IC.folder,aktif,'Dokumen aktif'),
     statCard('coral',IC.cal,mendesak,'Deadline mendesak'),
-    statCard('pink',IC.book,baru,'Regulasi baru'),
+    statCard('pink',IC.book,totalReg,'Regulasi'),
     statCard('lavender',IC.check,selesai,'Sudah selesai')
   ].join('');
 
@@ -871,6 +887,57 @@ function renderCalendar(){
   document.getElementById('calDays').innerHTML=html;
   renderUpcoming();
 }
+/* ---------- Ekspor ke kalender (.ics) ---------- */
+function icsEsc(s){return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');}
+function icsDate(d){return d.replace(/-/g,'');}
+function pad2(n){return String(n).padStart(2,'0');}
+function icsDateAddDay(d){const x=new Date(d+'T00:00:00');x.setDate(x.getDate()+1);return x.getFullYear()+pad2(x.getMonth()+1)+pad2(x.getDate());}
+function icsDateTime(d,t){const hm=(t||'00:00').split(':');return d.replace(/-/g,'')+'T'+pad2(hm[0]||'00')+pad2(hm[1]||'00')+'00';}
+function icsAddHour(d,t){const hm=(t||'00:00').split(':');const x=new Date(d+'T'+pad2(hm[0]||'00')+':'+pad2(hm[1]||'00')+':00');x.setHours(x.getHours()+1);return x.getFullYear()+pad2(x.getMonth()+1)+pad2(x.getDate())+'T'+pad2(x.getHours())+pad2(x.getMinutes())+'00';}
+function icsStamp(){const n=new Date();return n.getUTCFullYear()+pad2(n.getUTCMonth()+1)+pad2(n.getUTCDate())+'T'+pad2(n.getUTCHours())+pad2(n.getUTCMinutes())+pad2(n.getUTCSeconds())+'Z';}
+function buildICS(){
+  const stamp=icsStamp();
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Aca Space//Pelacak Lingkungan//ID','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Aca Space'];
+  state.docs.forEach(d=>{
+    if(!d.deadline||d.status==='Selesai')return;
+    const title='Deadline: '+d.nama+(d.klien?(' ('+d.klien+')'):'');
+    const desc=[d.jenis?('Jenis: '+d.jenis):'',d.pic?('PIC: '+d.pic):'',d.status?('Status: '+d.status):'',d.catatan||''].filter(Boolean).join('\n');
+    L.push('BEGIN:VEVENT','UID:doc-'+d.id+'@acaspace','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+icsDate(d.deadline),'DTEND;VALUE=DATE:'+icsDateAddDay(d.deadline),'SUMMARY:'+icsEsc(title));
+    if(desc)L.push('DESCRIPTION:'+icsEsc(desc));
+    L.push('BEGIN:VALARM','TRIGGER:-P3D','ACTION:DISPLAY','DESCRIPTION:'+icsEsc('Deadline 3 hari lagi: '+d.nama),'END:VALARM');
+    L.push('BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:'+icsEsc('Deadline besok: '+d.nama),'END:VALARM');
+    L.push('END:VEVENT');
+  });
+  state.meetings.forEach(m=>{
+    if(!m.tanggal)return;
+    const title=m.judul||'Rapat';
+    const desc=[m.terkait?('Terkait: '+m.terkait):'',m.link?('Tautan: '+m.link):'',m.catatan||''].filter(Boolean).join('\n');
+    L.push('BEGIN:VEVENT','UID:meet-'+m.id+'@acaspace','DTSTAMP:'+stamp);
+    if(m.waktuMulai){L.push('DTSTART:'+icsDateTime(m.tanggal,m.waktuMulai),'DTEND:'+(m.waktuSelesai?icsDateTime(m.tanggal,m.waktuSelesai):icsAddHour(m.tanggal,m.waktuMulai)));}
+    else{L.push('DTSTART;VALUE=DATE:'+icsDate(m.tanggal),'DTEND;VALUE=DATE:'+icsDateAddDay(m.tanggal));}
+    L.push('SUMMARY:'+icsEsc(title));
+    if(desc)L.push('DESCRIPTION:'+icsEsc(desc));
+    if(m.link)L.push('LOCATION:'+icsEsc(m.link));
+    L.push('BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:'+icsEsc('Rapat besok: '+title),'END:VALARM');
+    L.push('BEGIN:VALARM','TRIGGER:-PT30M','ACTION:DISPLAY','DESCRIPTION:'+icsEsc('Rapat 30 menit lagi: '+title),'END:VALARM');
+    L.push('END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.join('\r\n');
+}
+function downloadICS(){
+  const n=state.docs.filter(d=>d.deadline&&d.status!=='Selesai').length+state.meetings.filter(m=>m.tanggal).length;
+  if(n===0){toast('Belum ada deadline atau jadwal untuk diekspor');return;}
+  try{
+    const blob=new Blob([buildICS()],{type:'text/calendar;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='aca-space-jadwal.ics';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    toast('File kalender diunduh ('+n+' agenda)');
+  }catch(e){toast('Gagal membuat file kalender');}
+}
+
 function renderUpcoming(){
   const box=document.getElementById('upcoming');
   const todayStr=localISO(new Date());
@@ -1061,6 +1128,35 @@ function openOverlay(ov,focusId){ov.classList.add('open');ov.setAttribute('aria-
 function closeOverlay(ov){ov.classList.remove('open');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';if(lastFocus&&lastFocus.focus)lastFocus.focus();}
 
 /* ---------- Events ---------- */
+/* ---------- Ekspor / Impor data (cadangan) ---------- */
+function exportData(){
+  try{
+    const payload=Object.assign({app:'Aca Space',version:1,exportedAt:new Date().toISOString()},snapshot());
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='aca-space-backup-'+localISO(new Date())+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    toast('Data diekspor');
+  }catch(e){toast('Gagal mengekspor data');}
+}
+function importData(file){
+  const reader=new FileReader();
+  reader.onerror=()=>toast('Gagal membaca file');
+  reader.onload=()=>{
+    let obj;
+    try{obj=JSON.parse(reader.result);}catch(e){toast('File rusak atau bukan format cadangan');return;}
+    if(!obj||!(Array.isArray(obj.docs)||Array.isArray(obj.regs)||Array.isArray(obj.meetings))){toast('File tidak dikenali sebagai cadangan Aca Space');return;}
+    const nd=Array.isArray(obj.docs)?obj.docs.length:0,nr=Array.isArray(obj.regs)?obj.regs.length:0,nm=Array.isArray(obj.meetings)?obj.meetings.length:0;
+    if(!confirm('Impor akan MENGGANTI semua data saat ini (termasuk yang tersimpan di cloud) dengan isi file: '+nd+' dokumen, '+nr+' regulasi, '+nm+' jadwal.\n\nLanjutkan?'))return;
+    applySnapshot(obj);
+    persist();
+    renderAll();
+    toast('Data berhasil diimpor');
+  };
+  reader.readAsText(file);
+}
+
 function bind(){
   document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
   document.getElementById('syncStatus').addEventListener('click',syncNow);
@@ -1120,6 +1216,10 @@ function bind(){
     const day=e.target.closest('.cal-day');if(day&&day.dataset.date&&!day.classList.contains('other'))openMeetingModal(null,day.dataset.date);
   });
   document.getElementById('upcoming').addEventListener('click',e=>{if(e.target.closest('a'))return;const row=e.target.closest('[data-meet]');if(row)openMeetingModal(row.dataset.meet);});
+  document.getElementById('calExport').addEventListener('click',downloadICS);
+  document.getElementById('btnExport').addEventListener('click',exportData);
+  document.getElementById('btnImport').addEventListener('click',()=>document.getElementById('importFile').click());
+  document.getElementById('importFile').addEventListener('change',e=>{const f=e.target.files[0];if(f)importData(f);e.target.value='';});
   document.getElementById('regKategori').addEventListener('change',e=>{const lain=document.getElementById('regKategoriLain');if(e.target.value==='Lainnya'){lain.style.display='block';lain.focus();}else{lain.style.display='none';}});
 
   // banner
